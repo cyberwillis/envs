@@ -59,10 +59,17 @@
 export VERSION=10.0
 
 #http://www.dreamsyssoft.com/unix-shell-scripting/ifelse-tutorial.php
-if [[ "$#" -eq  "1" ]];
-then
-    VERSION="$1"
+if [[ "$#" -gt 0 ]];then
+
+  VERSION="$1"
+
+  #TODO: future implementation of 'ubuntu' and 'rhel'
+  if [[ "$#" -gt  1 ]];
+  then
+      PLATFORM="$2"
+  fi
 fi
+
 
 echo "     __        _     _ _               ___          _        ";
 echo "  /\ \ \__   _(_) __| (_) __ _        / __\   _  __| | __ _  ";
@@ -99,7 +106,7 @@ install_cuda_10_0() {
   sudo apt update
   msg "Installing Cuda Toolkit $VERSION"
   sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-          cuda-compat-$CUDA_VERSION=$CUDA_PKG_VERSION \
+          cuda-compat-10-0=410.48-1 \
           cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
           cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
           cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
@@ -117,7 +124,10 @@ install_cuda_10_0() {
           libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
           libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
           cuda-nvcc-$CUDA_VERSION 
+          
+          #cuda-compat-$CUDA_VERSION=$CUDA_PKG_VERSION \
           #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+
 }
 
 install_cuda_9_2() {
