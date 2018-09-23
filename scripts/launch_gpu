@@ -177,6 +177,8 @@ if [[ "$#" -gt 0 ]]; then
   process;
   
 else
+  echo "Cotainers until now:"
+  lxc ls;
   echo ""
   echo "Type the name of the container [default=$MACHINE_CONTAINER]:"
   read NAME
