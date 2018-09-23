@@ -140,6 +140,7 @@ build_container() {
   configure "base" "/scripts/base"
   configure "cuda" "/scripts/cuda $CUDA_VERSION"
   configure "python3" "/scripts/python3 3.6"
+  configure "nodejs" "/scripts/nodejs"
 }
 
 post_build() {
