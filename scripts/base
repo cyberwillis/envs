@@ -1,0 +1,60 @@
+#!/bin/bash -e
+
+echo "   ___                  __                  _     _ _             ";
+echo "  / _ \_ __ ___        /__\ ___  __ _ _   _(_)___(_) |_ ___  ___  ";
+echo " / /_)/ '__/ _ \_____ / \/// _ \/ _\` | | | | / __| | __/ _ \/ __| ";
+echo "/ ___/| | |  __/_____/ _  \  __/ (_| | |_| | \__ \ | ||  __/\__ \ ";
+echo "\/    |_|  \___|     \/ \_/\___|\__, |\__,_|_|___/_|\__\___||___/ ";
+echo "                                   |_|                            ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+msg "Block Periodic Updates"
+sudo sed -i.bak 's=APT::Periodic::Update-Package-Lists "1";=APT::Periodic::Update-Package-Lists "0";=g' /etc/apt/apt.conf.d/10periodic
+sudo sed -i.bak 's=APT::Periodic::Update-Package-Lists "1";=APT::Periodic::Update-Package-Lists "0";=g' /etc/apt/apt.conf.d/20auto-upgrades
+sudo sed -i.bak 's=APT::Periodic::Unattended-Upgrade "1";=APT::Periodic::Unattended-Upgrade "0";=g' /etc/apt/apt.conf.d/20auto-upgrades
+
+msg "Upgrading packages once"
+sudo apt update
+sudo apt remove lxd lxd-client -y
+sudo apt upgrade -y
+
+msg "Installing Generic Tools and Applying some fixes"
+sudo apt install -yq --no-install-recommends \
+                         openssh-server \
+                         avahi-daemon \
+                         avahi-utils \
+                         wget \
+                         bzip2 \
+                         ca-certificates \
+                         sudo \
+                         locales \
+                         fonts-liberation \
+                         git \
+                         curl \
+                         nano \
+                         build-essential \
+                         cmake \
+                         apt-file \
+                         pkg-config \
+                         gfortran
+
+msg "Updating gcc"
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+sudo apt update
+sudo apt install -y gcc-6 gcc-7 gcc-8
+
+sudo ln -s -f /usr/bin/gcc-8 /usr/bin/gcc
+
+sudo apt autoremove -y
+#sudo apt-file update
+sudo sed -i.bak "s=rlimit-nproc\=3=#rlimit-nproc\=3=g" /etc/avahi/avahi-daemon.conf
+
+msg "Fixing container locales"
+sudo locale-gen en_US.UTF-8
+#sudo apt-get install -yq --no-install-recommends language-pack-en
