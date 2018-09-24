@@ -44,12 +44,12 @@ sudo apt install -yq --no-install-recommends \
                          pkg-config \
                          gfortran
 
-msg "Updating gcc"
+msg "Updating gcc and g++"
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo apt update
-sudo apt install -y gcc-6 gcc-7 gcc-8
-
-sudo ln -s -f /usr/bin/gcc-8 /usr/bin/gcc
+sudo apt install -y gcc-6 gcc-7 gcc-8 g++-6 g++-7 g++-8
+sudo ln -s -f /usr/bin/gcc-7 /usr/bin/gcc
+sudo ln -s -f /usr/bin/g++-7 /usr/bin/g++
 
 sudo apt autoremove -y
 #sudo apt-file update
