@@ -1,0 +1,44 @@
+#!/bin/bash -e
+
+echo "   __        _ _        ";
+echo "   \ \ _   _| (_) __ _  ";
+echo "    \ \ | | | | |/ _\` | ";
+echo " /\_/ / |_| | | | (_| | ";
+echo " \___/ \__,_|_|_|\__,_| ";
+echo "                        ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+export PATH=$HOME/.local/bin:$PATH
+export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+export PYTHON_BIN_PATH=/usr/bin/python3
+export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+msg "Installing Julia"
+major=1
+minor=0
+patch=0
+julia_version=${major}.${minor}
+julia_filename=julia-${julia_version}.${patch}-linux-x86_64.tar.gz
+
+mkdir -p $HOME/julia
+cd $HOME
+
+if [[ ! -e "$HOME/$julia_filename" ]];
+then
+    wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_version}/${julia_filename} -O $HOME/${julia_filename}
+    tar -xf $HOME/${julia_filename} -C $HOME/julia/
+    rm $HOME/${julia_filename}
+    chown ubuntu:ubuntu $HOME/julia/ -R
+    julia_folder=$(ls $HOME/julia/)
+    sudo ln -s $HOME/julia/${julia_folder}/bin/julia /usr/bin/julia
+fi
+
+#mv /home/ubuntu/julia/${julia_folder} /home/ubuntu/julia/${julia_version}
+msg "Installing Julia kernel for jupyter (IJulia)"
+julia -e "using Pkg;Pkg.add(\"IJulia\")"

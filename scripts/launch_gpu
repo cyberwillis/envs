@@ -146,6 +146,7 @@ build_container() {
   configure "r" "/scripts/r"
   configure "octave" "/scripts/octave"
   configure "javascript" "/scripts/javascript"
+  configure "julia" "/scripts/julia"
 }
 
 post_build() {
