@@ -17,7 +17,7 @@ requirement() {
 
 build(){
 
-    sudo apt install libeigen3-dev -y
+    sudo apt install libeigen3-dev imagemagick -y
     #mkdir -p /var/python-repo-local/3.6
     pip download -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
     pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
@@ -69,26 +69,39 @@ build(){
     mv /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old
     cp $HOME/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}
     
-    #BUILD the documentation
-    sudo apt install imagemagick -y
+    pip install --user $HOME/pytorch/dist/torch*.whl
+    
     cd $HOME/pytorch/docs
-    pip install --user \
-        git+https://github.com/hynek/doc2dash.git  \
-        Sphinx==1.7.9 \
-        sphinxcontrib-katex==0.3.0 \
-        sphinx_rtd_theme==0.4.1 \
-        sphinxcontrib-websupport==1.1.0 \
-        pytorch-sphinx-theme \
-        sphinxcontrib-googleanalytics \
-        torchvision  \
-        torchtext
-
+    # building pytorch docsets
     make docset PYCMD=python3
     #TODO: Update the documentation for ZEAL (use cp always)
     if [[ -d "/frameworks/Zeal/docsets/PyTorch.docset" ]];then
         rm -rf  /frameworks/Zeal/docsets/PyTorch.docset
     fi 
     cp -R PyTorch.docset /frameworks/Zeal/docsets/PyTorch.docset
+
+    # Buildint torchvision
+    cd $HOME
+    if [[ -d "$HOME/vision" ]]; then
+        cd $HOME/vision
+        git pull
+    else
+        git clone --recurse https://github.com/pytorch/vision.git
+        cd $HOME/vision
+    fi
+    python3 setup.py bdist_wheel
+    mv $HOME/vision/dist/torchvision*.whl /var/python-repo-local/3.6/
+
+    # Buildint torchvision docsets
+    cd $HOME/vision/docs
+    make docset
+    if [[ -d "/frameworks/Zeal/docsets/torchvision.docset" ]];then
+        rm -rf  /frameworks/Zeal/docsets/torchvision.docset
+    fi 
+    cp -R torchvision.docset /frameworks/Zeal/docsets/torchvision.docset
+
+    pip install --user $HOME/vision/dist/torch*.whl
+    pip install --user torchtext
 }
 
 requirement;

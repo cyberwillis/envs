@@ -17,3 +17,11 @@ pybind11
 #pytest 3.7.0 has requirement attrs>=17.4.0, but you'll have attrs 17.2.0 which is incompatible.
 pytest==3.7.4
 attrs==17.4.0
+#build documentation
+git+https://github.com/hynek/doc2dash.git  \
+Sphinx==1.7.9 \
+sphinxcontrib-katex==0.3.0 \
+sphinx_rtd_theme==0.4.1 \
+sphinxcontrib-websupport==1.1.0 \
+pytorch-sphinx-theme \
+sphinxcontrib-googleanalytics \
