@@ -1,0 +1,27 @@
+#!/bin/bash -e
+
+echo "   ___     _                   ";
+echo "  /___\___| |_ __ ___   _____  ";
+echo " //  // __| __/ _\` \ \ / / _ \ ";
+echo "/ \_// (__| || (_| |\ V /  __/ ";
+echo "\___/ \___|\__\__,_| \_/ \___| ";
+echo "                               ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+msg() {
+    echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+export PATH=$HOME/.local/bin:$PATH
+export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+export PYTHON_BIN_PATH=/usr/bin/python3
+export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+msg "Installing Octave"
+sudo apt update
+sudo apt install -yq --no-install-recommends \
+                         octave
+
+msg "Installing Octave kernel for Jupyter"
+pip install metakernel octave_kernel --user

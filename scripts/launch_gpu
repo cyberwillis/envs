@@ -143,6 +143,8 @@ build_container() {
   configure "python3" "/scripts/python3 3.6"
   configure "nodejs" "/scripts/nodejs"
   configure "jupyterlab" "/scripts/jupyterlab"
+  configure "r" "/scripts/r"
+  configure "octave" "/scripts/octave"
 }
 
 post_build() {

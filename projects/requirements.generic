@@ -1,0 +1,12 @@
+pip
+numpy
+scipy
+matplotlib
+jupyterlab
+ipyparallel
+ipykernel
+ipywidgets
+jupyter_contrib_nbextensions
+notebook==5.6.0
+jupyter-client==5.2.3
+#RISE

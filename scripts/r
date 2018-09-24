@@ -1,0 +1,55 @@
+#!/bin/bash -e
+
+echo "   __  ";
+echo "  /__\ ";
+echo " / \// ";
+echo "/ _  \ ";
+echo "\/ \_/ ";
+echo "       ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+export PATH=$HOME/.local/bin:$PATH
+export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+export PYTHON_BIN_PATH=/usr/bin/python3
+export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+sudo touch /etc/apt/sources.list.d/cran.list
+echo 'deb https://cloud.r-project.org/bin/linux/ubuntu xenial/' | sudo tee -a /etc/apt/sources.list.d/cran.list
+echo 'deb http://archive.ubuntu.com/ubuntu bionic-backports main restricted universe' | sudo tee -a /etc/apt/sources.list.d/cran.list
+
+msg "Installing R"
+sudo apt update
+sudo apt install -yq --no-install-recommends \
+                          r-base
+#apt-get install r-base-dev -y
+
+msg "Installing packages for IRKernel"
+sudo apt install -yq --no-install-recommends \
+                         libssl-dev \
+                         libxml2-dev \
+                         libcurl4-openssl-dev \
+                         libssh2-1-dev \
+                         libcairo-dev \
+                         libxt-dev
+
+mkdir $HOME/.local/lib/R/site-library -p
+
+export R_LIBS_USER="$HOME/.local/lib/R/site-library"
+
+echo 'export R_LIBS_USER="$HOME/.local/lib/R/site-library"' | tee -a $HOME/.bashrc
+echo 'export R_LIBS_USER="$HOME/.local/lib/R/site-library"' | tee -a $HOME/.profile
+R -e ".libPaths()"
+sudo R -e "install.packages(c('repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest'), dependencies = TRUE)"
+
+#sudo R -e "install.packages(c('repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest'),lib=Sys.getenv('R_LIBS_USER'), dependencies = TRUE)"
+##R -e "install.packages(c('repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest'), dependencies = TRUE)"
+
+msg "Installing R kernel for Jupyter (IRKernel)"
+sudo R -e "devtools::install_github('IRkernel/IRkernel')"
+R -e 'IRkernel::installspec()'
