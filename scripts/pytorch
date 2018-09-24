@@ -1,0 +1,95 @@
+#!/bin/bash -e
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+requirement() {
+
+    msg "Installing Requirements"
+    sudo apt update;
+    #THD dependencies
+    sudo apt install libasio-dev mpich libopenmpi-dev -y
+}
+
+build(){
+
+    sudo apt install libeigen3-dev -y
+    #mkdir -p /var/python-repo-local/3.6
+    pip download -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
+    pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
+    
+    ##Verify if container has this project, or clone the repository
+    cd $HOME
+    if [[ -d "$HOME/mkl-dnn" ]]; then
+        cd $HOME/mkl-dnn
+        git pull
+    else
+        git clone --recurse https://github.com/intel/mkl-dnn.git
+    fi
+    mkdir $HOME/mkl-dnn/build -p && cd $HOME/mkl-dnn/build && cmake .. && make -j8
+    sudo make install && sudo ldconfig
+
+    ## Verify if container has this project, if yes update it else verify if exists in frameworks folder , else clone it
+    ## The ideia here is to keep a version that can be updated and re-built without lose much time
+    cd $HOME
+    if [[ -d "$HOME/pytorch" ]]; then
+        msg "Updating pytorch source"
+        cd $HOME/pytorch
+        sleep 5s
+        git pull
+        sleep 5s
+    elif [[ -d "/frameworks/pytorch" ]]; then
+        msg "Copying the pytorch source"
+        cp /frameworks/pytorch $HOME -R
+    else
+        msg "Cloning the pytorch source"
+        git clone --recurse https://github.com/pytorch/pytorch
+    fi;
+    
+    cd $HOME/pytorch
+    if [[ -e "$HOME/pytorch/dist/torch*.whl" ]];then
+        rm $HOME/pytorch/dist/torch*.whl
+    fi
+    if [ "${prefix}" = "cpu" ]; then
+        #NO_CUDNN=1 NO_SYSTEM_NCCL=1
+        USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py build_deps
+        USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py develop --user
+        USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
+    else
+        TORCH_CUDA_ARCH_LIST="3.0" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py build_deps
+        TORCH_CUDA_ARCH_LIST="3.0" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py develop --user
+        TORCH_CUDA_ARCH_LIST="3.0" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
+    fi
+    
+    #TODO: save the built package into correct folder
+    mv /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old
+    cp $HOME/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}
+    
+    #BUILD the documentation
+    sudo apt install imagemagick -y
+    cd $HOME/pytorch/docs
+    pip install --user \
+        git+https://github.com/hynek/doc2dash.git  \
+        Sphinx==1.7.9 \
+        sphinxcontrib-katex==0.3.0 \
+        sphinx_rtd_theme==0.4.1 \
+        sphinxcontrib-websupport==1.1.0 \
+        pytorch-sphinx-theme \
+        sphinxcontrib-googleanalytics \
+        torchvision  \
+        torchtext
+
+    make docset PYCMD=python3
+    #TODO: Update the documentation for ZEAL (use cp always)
+    if [[ -d "/frameworks/Zeal/docsets/PyTorch.docset" ]];then
+        rm -rf  /frameworks/Zeal/docsets/PyTorch.docset
+    fi 
+    cp -R PyTorch.docset /frameworks/Zeal/docsets/PyTorch.docset
+}
+
+requirement;
+build;

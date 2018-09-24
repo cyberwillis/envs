@@ -1,0 +1,19 @@
+future
+doc2dash
+mkl
+#==2018.0.3
+mkl-include
+#==2018.0.3
+intel_openmp
+#==2018.0.3
+numpy
+scipy
+matplotlib
+pyyaml
+cffi
+typing
+ninja
+pybind11
+#pytest 3.7.0 has requirement attrs>=17.4.0, but you'll have attrs 17.2.0 which is incompatible.
+pytest==3.7.4
+attrs==17.4.0
