@@ -98,6 +98,7 @@ launch() {
     #http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/
     lxc config device add $MACHINE_CONTAINER cuda-developer-ubuntu1604  disk  source=$NVIDIA_REPO_MIRROR/cuda/repos/ubuntu1604/x86_64  path=/var/cuda-repo-local-ubuntu1604;
     lxc config device add $MACHINE_CONTAINER cuda-developer-rhel7       disk  source=$NVIDIA_REPO_MIRROR/cuda/repos/rhel7/x86_64       path=/var/cuda-repo-local-rhel7;
+    lxc config device add $MACHINE_CONTAINER python                     disk  source=$REPOSITORY/python                                 path=/var/python-repo-local
 
     #http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/
     lxc config device add $MACHINE_CONTAINER ml-developer-download-nvidia-com     disk source=$NVIDIA_REPO_MIRROR/machine-learning/repos/ubuntu1604/x86_x64       path=/var/machine-learning-repo-local-ubuntu1604;
@@ -141,6 +142,7 @@ build_container() {
   configure "cuda" "/scripts/cuda $CUDA_VERSION"
   configure "python3" "/scripts/python3 3.6"
   configure "nodejs" "/scripts/nodejs"
+  configure "jupyterlab" "/scripts/jupyterlab"
 }
 
 post_build() {

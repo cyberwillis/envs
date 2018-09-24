@@ -28,16 +28,16 @@ install_python35() {
                 python3-pip
 
     export PYTHONPATH=$HOME/.local/lib/python3.5/site-packages
-    echo "export PYTHONPATH=/home/ubuntu/.local/lib/python3.5/site-packages" | tee -a /home/ubuntu/.bashrc
-    echo "export PYTHONPATH=/home/ubuntu/.local/lib/python3.5/site-packages" | tee -a /home/ubuntu/.profile
+    echo "export PYTHONPATH=$HOME/.local/lib/python3.5/site-packages" | tee -a $HOME/.bashrc
+    echo "export PYTHONPATH=$HOME/.local/lib/python3.5/site-packages" | tee -a $HOME/.profile
 
     export PYTHON_BIN_PATH=/usr/bin/python3
-    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a /home/ubuntu/.bashrc
-    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a /home/ubuntu/.profile
+    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a $HOME/.bashrc
+    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a $HOME/.profile
 
     export PYTHON_LIB_PATH=$HOME/.local/lib/python3.5/site-packages
-    echo "export PYTHON_LIB_PATH=/home/ubuntu/.local/lib/python3.5/site-packages" | tee -a /home/ubuntu/.bashrc
-    echo "export PYTHON_LIB_PATH=/home/ubuntu/.local/lib/python3.5/site-packages" | tee -a /home/ubuntu/.profile
+    echo "export PYTHON_LIB_PATH=$HOME/.local/lib/python3.5/site-packages" | tee -a $HOME/.bashrc
+    echo "export PYTHON_LIB_PATH=$HOME/.local/lib/python3.5/site-packages" | tee -a $HOME/.profile
 }
 
 install_python36() {
@@ -70,27 +70,27 @@ install_python36() {
                 libpython3.6-dev \
                 libpython3.6-stdlib
 
-    export PATH=/home/ubuntu/.local/bin:$PATH
-    echo "export PATH=/home/ubuntu/.local/bin:$PATH" | tee -a /home/ubuntu/.bashrc
-    echo "export PATH=/home/ubuntu/.local/bin:$PATH" | tee -a /home/ubuntu/.profile
+    export PATH=$HOME/.local/bin:$PATH
+    echo "export PATH=$HOME/.local/bin:$PATH" | tee -a $HOME/.bashrc
+    echo "export PATH=$HOME/.local/bin:$PATH" | tee -a $HOME/.profile
 
     #curl -sL https://bootstrap.pypa.io/get-pip.py | bash -
-    curl https://bootstrap.pypa.io/get-pip.py -o /home/ubuntu/get-pip.py
-    chown ubuntu:ubuntu /home/ubuntu/get-pip.py
-    python3 /home/ubuntu/get-pip.py --user
-    rm /home/ubuntu/get-pip.py
+    curl https://bootstrap.pypa.io/get-pip.py -o $HOME/get-pip.py
+    #chown ubuntu:ubuntu $HOME/get-pip.py
+    python3 $HOME/get-pip.py --user
+    rm $HOME/get-pip.py
 
-    export PYTHONPATH=/home/ubuntu/.local/lib/python3.6/site-packages
-    echo "export PYTHONPATH=/home/ubuntu/.local/lib/python3.6/site-packages" | tee -a /home/ubuntu/.bashrc
-    echo "export PYTHONPATH=/home/ubuntu/.local/lib/python3.6/site-packages" | tee -a /home/ubuntu/.profile
+    export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+    echo "export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages" | tee -a $HOME/.bashrc
+    echo "export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages" | tee -a $HOME/.profile
 
     export PYTHON_BIN_PATH=/usr/bin/python3
-    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a /home/ubuntu/.bashrc
-    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a /home/ubuntu/.profile
+    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a $HOME/.bashrc
+    echo "export PYTHON_BIN_PATH=/usr/bin/python3" | tee -a $HOME/.profile
 
-    export PYTHON_LIB_PATH=/home/ubuntu/.local/lib/python3.6/site-packages
-    echo "export PYTHON_LIB_PATH=/home/ubuntu/.local/lib/python3.6/site-packages" | tee -a /home/ubuntu/.bashrc
-    echo "export PYTHON_LIB_PATH=/home/ubuntu/.local/lib/python3.6/site-packages" | tee -a /home/ubuntu/.profile
+    export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+    echo "export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages" | tee -a $HOME/.bashrc
+    echo "export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages" | tee -a $HOME/.profile
 }
 
 install_miniconda(){
@@ -101,8 +101,8 @@ install_miniconda(){
 
   #From Host
   export ROOT_DIR=/opt/anaconda
-  chmod +x /frameworks/anaconda/Miniconda3-latest-Linux-x86_64.sh
-  sudo /frameworks/anaconda/Miniconda3-latest-Linux-x86_64.sh -b -p $ROOT_DIR
+  chmod +x /utils/anaconda/Miniconda3-latest-Linux-x86_64.sh
+  sudo /utils/anaconda/Miniconda3-latest-Linux-x86_64.sh -b -p $ROOT_DIR
   sudo chown $USER:$USER $ROOT_DIR -R
 
   export PATH="$ROOT_DIR/bin:$PATH"
