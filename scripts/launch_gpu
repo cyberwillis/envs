@@ -19,6 +19,7 @@ launch() {
     PROJECTS=$PWD/../projects;
     SCRIPTS=$PWD/../scripts;
     UTILS=$PWD/../utils;
+    SHARED=$PWD/../shared;
     NVIDIA_REPO_LOCAL=$REPOSITORY/nvidia-repo-local;
     NVIDIA_REPO_MIRROR=$REPOSITORY/nvidia-repo-mirror/compute;
 
@@ -36,6 +37,7 @@ launch() {
     lxc config device add $MACHINE_CONTAINER projects    disk source=$PROJECTS    path=/projects;
     lxc config device add $MACHINE_CONTAINER scripts     disk source=$SCRIPTS     path=/scripts;
     lxc config device add $MACHINE_CONTAINER utils       disk source=$UTILS       path=/utils;
+    lxc config device add $MACHINE_CONTAINER shared      disk source=$SHARED      path=/shared;
     
     lxc config show $MACHINE_CONTAINER | sed "s/^description:.*/description: cuda-$CUDA_VERSION/" | lxc config edit $MACHINE_CONTAINER;
     if [[ $CUDA_VERSION == "10.0" ]];then
