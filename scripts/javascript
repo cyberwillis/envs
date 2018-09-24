@@ -1,0 +1,26 @@
+#!/bin/bash -e
+
+echo "   __                                 _       _    ";
+echo "   \ \  __ ___   ____ _ ___  ___ _ __(_)_ __ | |_  ";
+echo "    \ \/ _\` \ \ / / _\` / __|/ __| '__| | '_ \| __| ";
+echo " /\_/ / (_| |\ V / (_| \__ \ (__| |  | | |_) | |_  ";
+echo " \___/ \__,_| \_/ \__,_|___/\___|_|  |_| .__/ \__| ";
+echo "                                       |_|         ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+cd $HOME
+export PATH=$HOME/.local/bin:$PATH
+export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+export PYTHON_BIN_PATH=/usr/bin/python3
+export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+msg "Installing Javascript kernel for Jupyter"
+npm install -g ijavascript
+
+ijsinstall

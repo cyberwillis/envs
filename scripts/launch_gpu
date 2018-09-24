@@ -145,6 +145,7 @@ build_container() {
   configure "jupyterlab" "/scripts/jupyterlab"
   configure "r" "/scripts/r"
   configure "octave" "/scripts/octave"
+  configure "javascript" "/scripts/javascript"
 }
 
 post_build() {
