@@ -1,0 +1,87 @@
+#!/bin/bash -e
+
+echo "   __                    _            _       _      ";
+echo "   \ \ _   _ _ __  _   _| |_ ___ _ __| | __ _| |__   ";
+echo "    \ \ | | | '_ \| | | | __/ _ \ '__| |/ _\` | '_ \  ";
+echo " /\_/ / |_| | |_) | |_| | ||  __/ |  | | (_| | |_) | ";
+echo " \___/ \__,_| .__/ \__, |\__\___|_|  |_|\__,_|_.__/  ";
+echo "            |_|    |___/                             ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+export PATH=$HOME/.local/bin:$PATH
+export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+export PYTHON_BIN_PATH=/usr/bin/python3
+export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+#msg "Installing Pre-requisites for docs"
+#sudo apt-get -qy install pandoc texlive-xetex
+
+msg "Installing Jupyterlab"
+
+#mkdir -p /var/python-repo-local/3.6
+pip download -r /projects/requirements.generic -d /var/python-repo-local/3.6
+pip install --upgrade --user -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
+
+msg "Enabling ipyparallel extension"
+ipcluster start --n=8 --ip=* --daemonize && ipcluster stop
+jupyter nbextension install ipyparallel --py --user
+jupyter nbextension enable ipyparallel --py --user
+jupyter serverextension enable ipyparallel --py --user
+
+msg "Enabling ipyparallel widgets extentions"
+jupyter nbextension enable widgetsnbextension --py --user
+
+msg "Enabling extentions configuration"
+jupyter nbextensions_configurator enable --user
+
+msg "Enabling contribution extentions"
+jupyter contrib nbextension install --user
+
+msg "Enabling server extentions"
+jupyter serverextension enable jupyterlab --py --user
+
+msg "Enabling labextentions"
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+
+msg "Generating jupyterlab configuration file" #msg "Fixing Avahi multi-task limitation between Host and Guest"
+jupyter-notebook --generate-config -y
+
+msg "Enabling Plotly in jupyterlab"
+jupyter labextension install @jupyterlab/plotly-extension
+
+echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl --user'" | tee -a $HOME/.bashrc
+echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision --user'" | tee -a $HOME/.bashrc
+echo 'export JUPYTER_SECRET="ab6f0305db50:baab49d2ba9f8949f00ddcc1f47c68a07930c2f2"'  | tee -a $HOME/.bashrc
+echo 'export JUPYTER_PORT=8888'  | tee -a $HOME/.bashrc
+echo 'alias jbook="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=sha1:$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
+echo 'alias jbookt="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
+echo "alias jlab=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.password='sha1:\$JUPYTER_SECRET'  --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
+echo "alias jlabt=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
+
+pip download -r /projects/requirements.fastai -d /var/python-repo-local/3.6
+pip install --user -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
+
+sudo apt update
+sudo apt install -y libasio-dev mpich libopenmpi-dev libeigen3-dev graphviz
+
+cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
+cmake_folder=cmake-3.11.3-Linux-x86_64
+cp /utils/cmake/$cmake_filename $HOME/$cmake_filename
+tar -xf $HOME/$cmake_filename -C $HOME
+cd $HOME/$cmake_folder
+sudo cp -R ./bin /usr/
+sudo cp -R ./share /usr/
+sudo cp -R ./doc /usr/share/
+sudo cp -R ./man /usr/share/
+cd .. && rm -rf $HOME/$cmake_folder
+
+cd $HOME
+git clone --recurse https://github.com/intel/mkl-dnn.git
+mkdir $HOME/mkl-dnn/build -p && cd $HOME/mkl-dnn/build && cmake .. && make -j8
+sudo make install && sudo ldconfig
