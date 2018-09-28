@@ -7,53 +7,90 @@ msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
 
-requirement() {
-
+requirements() 
+{
     msg "Installing Requirements"
     sudo apt update;
+    
     #THD dependencies
     sudo apt install libasio-dev mpich libopenmpi-dev -y
-}
 
-build(){
-
+    #Pytorch Requirements
     sudo apt install libeigen3-dev imagemagick -y
     #mkdir -p /var/python-repo-local/3.6
-    pip download -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
+    pip download --exists-action 'w' -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
     pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
-    
-    ##Verify if container has this project, or clone the repository
+}
+
+update_mkl_dnn_sources()
+{
     cd $HOME
     if [[ -d "$HOME/mkl-dnn" ]]; then
+        msg "Updating mkl-dnn sources"
         cd $HOME/mkl-dnn
         git pull
     else
+       msg "Clonning mkl-dnn sources"
         git clone --recurse https://github.com/intel/mkl-dnn.git
     fi
-    mkdir $HOME/mkl-dnn/build -p && cd $HOME/mkl-dnn/build && cmake .. && make -j8
-    sudo make install && sudo ldconfig
+}
 
-    ## Verify if container has this project, if yes update it else verify if exists in frameworks folder , else clone it
-    ## The ideia here is to keep a version that can be updated and re-built without lose much time
+update_pytorch_sources()
+{
     cd $HOME
     if [[ -d "$HOME/pytorch" ]]; then
-        msg "Updating pytorch source"
+        msg "Updating pytorch sources"
         cd $HOME/pytorch
-        sleep 5s
         git pull
-        sleep 5s
-    elif [[ -d "/frameworks/pytorch" ]]; then
-        msg "Copying the pytorch source"
-        cp /frameworks/pytorch $HOME -R
     else
-        msg "Cloning the pytorch source"
+        msg "Cloning the pytorch sources"
         git clone --recurse https://github.com/pytorch/pytorch
     fi;
-    
+}
+
+update_torchvision_sources()
+{
+    cd $HOME
+    if [[ -d "$HOME/vision" ]]; then
+        msg "Updaing torchvision sources"
+        cd $HOME/vision
+        git pull
+    else
+        msg "Cloning torchvision sources"
+        git clone --recurse https://github.com/pytorch/vision.git
+    fi
+}
+
+update_tochtext_sources(){
+
+    cd $HOME
+    if [[ -d "$HOME/text" ]]; then
+        msg "Updaing torchtext sources"
+        cd $HOME/text
+        git pull
+    else
+        msg "Cloning torchtext sources"
+        git clone --recurse https://github.com/pytorch/text.git
+    fi
+}
+
+build_mkl_dnn_sources()
+{
+    msg "Building mkl-dnn"
+    mkdir $HOME/mkl-dnn/build -p
+    cd $HOME/mkl-dnn/build
+    cmake ..
+    make -j8
+    sudo make install
+    sudo ldconfig
+}
+
+build_pytorch_sources()
+{
     msg "Building PyTorch"
     cd $HOME/pytorch
-    if [[ -e "$HOME/pytorch/dist/torch*.whl" ]];then
-        rm $HOME/pytorch/dist/torch*.whl
+    if [[ -e "$HOME/pytorch/dist" ]];then
+        rm -rf $HOME/pytorch/dist
     fi
     if [ "${prefix}" = "cpu" ]; then
         #NO_CUDNN=1 NO_SYSTEM_NCCL=1
@@ -71,41 +108,72 @@ build(){
     cp $HOME/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}
     
     pip install --user $HOME/pytorch/dist/torch*.whl
-    
     cd $HOME/pytorch/docs
     msg "Building pytorch docset"
     make docset PYCMD=python3
     #TODO: Update the documentation for ZEAL (use cp always)
-    if [[ -d "/frameworks/Zeal/docsets/PyTorch.docset" ]];then
+    if [[ -e "/frameworks/Zeal/docsets/PyTorch.docset" ]];then
         rm -rf  /frameworks/Zeal/docsets/PyTorch.docset
     fi 
-    cp -R PyTorch.docset /frameworks/Zeal/docsets/PyTorch.docset
+    cp -R $HOME/pytorch/docs/PyTorch.docset /frameworks/Zeal/docsets/
+    #PyTorch.docset
+}
 
-    cd $HOME
-    if [[ -d "$HOME/vision" ]]; then
-        msg "Updaing torchvision"
-        cd $HOME/vision
-        git pull
-    else
-        msg "Cloning torchvision"
-        git clone --recurse https://github.com/pytorch/vision.git
-        cd $HOME/vision
-    fi
+build_torchvision_sources()
+{
     msg "Building torchvision"
+    cd $HOME/vision
+    if [[ -e "$HOME/vision/dist" ]];then
+        rm -rf $HOME/vision/dist
+    fi
     python3 setup.py bdist_wheel
+    pip install --user $HOME/vision/dist/torchvision*.whl
     mv $HOME/vision/dist/torchvision*.whl /var/python-repo-local/3.6/
 
     msg "Building torchvision docset"
     cd $HOME/vision/docs
     make docset
-    if [[ -d "/frameworks/Zeal/docsets/torchvision.docset" ]];then
+    if [[ -e "/frameworks/Zeal/docsets/torchvision.docset" ]];then
         rm -rf  /frameworks/Zeal/docsets/torchvision.docset
     fi 
-    cp -R torchvision.docset /frameworks/Zeal/docsets/torchvision.docset
+    cp -R $HOME/vision/docs/torchvision.docset /frameworks/Zeal/docsets/
+    #torchvision.docset
+}
 
-    pip install --user /var/python-repo-local/3.6/torchvision*.whl
+build_torchtext_sources()
+{
+    msg "Building torchtext"
+    cd $HOME/text
+    if [[ -e "$HOME/text/dist" ]];then
+        rm -rf $HOME/text/dist
+    fi
+    python3 setup.py bdist_wheel
+    pip install --user $HOME/text/dist/torchtext*.whl
+    mv $HOME/text/dist/torchtext*.whl /var/python-repo-local/3.6/
+
+    msg "Building torchtext docset"
+    cd $HOME/text/docs
+    make docset
+    if [[ -e "/frameworks/Zeal/docsets/torchtext.docset" ]];then
+        rm -rf  /frameworks/Zeal/docsets/torchtext.docset
+    fi 
+    cp -R $HOME/text/docs/torchtext.docset /frameworks/Zeal/docsets/
+    #torchtext.docset
+}
+
+build()
+{
+    requirements;
+
+    update_mkl_dnn_sources;
+    update_pytorch_sources;
+    update_torchvision_sources;
+
+    build_mkl_dnn_sources;
+    build_pytorch_sources;
+    build_torchvision_sources;
+    
     pip install --user torchtext
 }
 
-requirement;
 build;
