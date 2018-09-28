@@ -25,7 +25,7 @@ export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
 msg "Installing Jupyterlab"
 
 #mkdir -p /var/python-repo-local/3.6
-pip download -r /projects/requirements.generic -d /var/python-repo-local/3.6
+pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/3.6 
 pip install --upgrade --user -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
 
 msg "Enabling ipyparallel extension"
@@ -65,7 +65,7 @@ echo "alias jlab=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-brow
 echo 'alias jbookt="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
 echo "alias jlabt=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
 
-pip download -r /projects/requirements.fastai -d /var/python-repo-local/3.6
+pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/3.6
 pip install --user -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
 
 sudo apt update
