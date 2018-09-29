@@ -57,19 +57,22 @@
 #cuda-drivers	           Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
 
 export VERSION=10.0
+export LOCAL_REPOSITORY='yes'
+export PLATFORM='ubuntu1604'
 
 #http://www.dreamsyssoft.com/unix-shell-scripting/ifelse-tutorial.php
 if [[ "$#" -gt 0 ]];then
-
   VERSION="$1"
 
+  if [[ "$#" -gt 1 ]];then
+    LOCAL_REPOSITORY="$3"
+  fi
+
   #TODO: future implementation of 'ubuntu' and 'rhel'
-  if [[ "$#" -gt  1 ]];
-  then
-      PLATFORM="$2"
+  if [[ "$#" -gt  2 ]];then
+    PLATFORM="$2"
   fi
 fi
-
 
 echo "     __        _     _ _               ___          _        ";
 echo "  /\ \ \__   _(_) __| (_) __ _        / __\   _  __| | __ _  ";
@@ -85,244 +88,320 @@ msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
 
-install_cuda_10_0() {
+register_local_repository()
+{
+  if [[ $VERSION == "10.0" ]];then
 
+    sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
+    echo 'deb file:///var/cuda-repo-local-ubuntu1604 /'             | sudo tee /etc/apt/sources.list.d/cuda-local.list
+    echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+    
+    #apt-key add /var/cuda-repo-10-0-local/7fa2af80.pub
+    #echo 'deb file:///var/cuda-repo-10-0-local-10.0.130-410.48 /'  | sudo tee /etc/apt/sources.list.d/cuda-repo-10-0-local-10.0.130-410.48.list
+    echo 'deb file:///var/nccl-repo-2.3.4-ga-cuda10.0 /'            | sudo tee /etc/apt/sources.list.d/nccl-repo-2.3.4-ga-cuda10.0.list
+
+  elif [[ $VERSION == "9.2" ]];then
+    
+    sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
+    echo 'deb file:///var/cuda-repo-local-ubuntu1604 /'                      | sudo tee /etc/apt/sources.list.d/cuda-local.list
+    echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /'          | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+    
+    #apt-key add /var/cuda-repo-9-2-local/7fa2af80.pub
+    #echo 'deb file:///var/cuda-repo-9-2-local /'                            | sudo tee /etc/apt/sources.list.d/cuda-repo-9-2-local.list
+    #echo 'deb file:///var/cuda-repo-9-2-local-cublas-update-1 /'            | sudo tee /etc/apt/sources.list.d/cuda-repo-9-2-local-cublas-update-1.list
+    echo 'deb file:///var/nccl-repo-2.3.4-ga-cuda9.2 /'                      | sudo tee /etc/apt/sources.list.d/nccl-repo-2.3.4-ga-cuda9.2.list
+    echo 'deb file:///var/nv-tensorrt-repo-cuda9.2-ga-trt4.0.1.6-20180612 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-cuda9.2-ga-trt4.0.1.6-20180612.list
+
+  elif [[ $VERSION == "9.1" ]];then
+
+    sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
+    echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+    echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+    
+    #apt-key add /var/cuda-repo-9-1-local/7fa2af80.pub
+    #echo 'deb file:///var/cuda-repo-9-1-local /'v/etc/apt/sources.list.d/cuda-repo-9-1-local.list
+    #echo 'deb file:///var/cuda-repo-9-1-local-compiler-update-1 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-1-local-compiler-update-1.list
+    #echo 'deb file:///var/cuda-repo-9-1-local-cublas-performance-update-1 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-1-local-cublas-performance-update-1 .list
+    #echo 'deb file:///var/cuda-repo-9-1-local-cublas-performance-update-3 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-1-local-cublas-performance-update-3.list
+    echo 'deb file:///var/nccl-repo-2.1.15-ga-cuda9.1 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.1.15-ga-cuda9.1.list
+    #echo 'deb file:///var/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208.list
+
+  elif [[ $VERSION == "9.0" ]];then
+
+    sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
+    echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+    echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+    
+    #apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
+    #echo 'deb file:///var/cuda-repo-9-0-local /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local.list
+    #echo 'deb file:///var/cuda-repo-9-0-local-cublas-performance-update /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local-cublas-performance-update.list
+    #echo 'deb file:///var/cuda-repo-9-0-local-cublas-performance-update-2 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local-cublas-performance-update-2.list
+    #echo 'deb file:///var/cuda-repo-9-0-local-cublas-performance-update-3 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local-cublas-performance-update-3.list
+    #echo 'deb file:///var/cuda-repo-9-0-176-local-patch-4 /' | sudo tee -a /etc/apt/sources.list.d/cuda-repo-9-0-176-local-patch-4.list
+    echo 'deb file:///var/nccl-repo-2.3.4-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.3.4-ga-cuda9.0.list
+    #echo 'deb file:///var/nccl-repo-2.2.13-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.13-ga-cuda9.0.list
+    #echo 'deb file:///var/nccl-repo-2.2.12-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.12-ga-cuda9.0.list
+    #echo 'deb file:///var/nccl-repo-2.1.15-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.1.15-ga-cuda9.0.list
+    echo 'deb file:///var/nv-tensorrt-repo-cuda9.0-ga-trt4.0.1.6-20180612 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-cuda9.0-ga-trt4.0.1.6-20180612.list
+    #echo 'deb file:///var/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208.list
+
+  elif [[ $VERSION == "8.0" ]];then
+
+    sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
+    echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+    echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+    
+    #echo 'deb file:///var/cuda-repo-8-0-local-ga2 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-8-0-local-ga2.list
+    #echo 'deb file:///var/cuda-repo-8-0-local-cublas-performance-update /' | sudo tee /etc/apt/sources.list.d/cuda-repo-8-0-local-cublas-performance-update.list
+    echo 'deb file:///var/nccl-repo-2.2.13-ga-cuda8.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.13-ga-cuda8.0.list
+    #echo 'deb file:///var/nccl-repo-2.2.12-ga-cuda8.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.12-ga-cuda8.0.list
+    echo 'deb file:///var/nv-tensorrt-repo-cuda8.0-ga-trt4.0.1.6-20180612 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-cuda8.0-ga-trt4.0.1.6-20180612.list
+    ##echo 'deb file:///var/nv-tensorrt-repo-ga-cuda8.0-trt3.0.4-20180208 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-ga-cuda8.0-trt3.0.4-20180208.list
+    #apt-key add /var/cuda-repo-8-0-local-ga2/7fa2af80.pub
+
+  fi
+}
+
+register_remote_repository()
+{
+  #RedHat Enterprise 7
+  #echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  #Ubuntu 18.04
+  #echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+
+  #Ubuntu 16.04
+  echo 'deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+  echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+}
+
+install_cuda_packages()
+{
+  if [[ $VERSION == "10.0" ]];then
+
+    msg "Installing Cuda Toolkit $VERSION"
+    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+            cuda-compat-10-0=410.48-1 \
+            cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-documentation-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cupti-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            cuda-nvcc-$CUDA_VERSION 
+            
+            #cuda-compat-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+
+  elif [[ $VERSION == "9.2" ]];then
+    
+    msg "Installing Cuda Toolkit $VERSION"
+    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+            cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-documentation-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cupti-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            cuda-nvcc-$CUDA_VERSION 
+            
+            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+
+  elif [[ $VERSION == "9.1" ]];then
+
+    msg "Installing Cuda Toolkit $VERSION"
+    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            cuda-nvcc-$CUDA_VERSION 
+            
+            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+
+    #its not a certified repository so need to be installed manually
+    #dpkg -i /var/nccl-repo-2.2.12-ga-cuda9.1/libnccl2_${NCCL_VERSION}'-1+cuda'${CUDA_PKG_NCCL_VERSION}_amd64.deb
+    #dpkg -i /var/nccl-repo-2.2.12-ga-cuda9.1/libnccl-dev_${NCCL_VERSION}'-1+cuda'${CUDA_PKG_NCCL_VERSION}_amd64.deb
+
+  elif [[ $VERSION == "9.0" ]];then
+
+    msg "Installing Cuda Toolkit $VERSION"
+    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-core-9-0=9.0.176.3-1 \
+            cuda-cublas-9-0=9.0.176.4-1 \
+            cuda-cublas-dev-9-0=9.0.176.4-1 \
+            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION 
+            
+            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+
+  elif [[ $VERSION == "8.0" ]];then
+
+    msg "Installing Cuda Toolkit $VERSION"
+    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvrtc-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvrtc-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvgraph-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvgraph-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cusolver-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cusolver-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cublas-8-0=8.0.61.2-1 \
+            cuda-cublas-dev-8-0=8.0.61.2-1 \
+            cuda-cufft-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cufft-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-curand-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-curand-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cusparse-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cusparse-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-npp-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-npp-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-core-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-misc-headers-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-driver-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
+            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
+            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION 
+            
+            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+
+    # Bazel may not find this file so I created a symlink
+    # cd /usr/local/cuda-8.0/nvvm/libdevice
+    # sudo ln -s libdevice.compute_50.10.bc libdevice.10.bc
+    sudo ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_30.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc
+
+  fi
+}
+
+install_cuda_10_0() 
+{
   export CUDA_VERSION=10-0
   export CUDA_PKG_VERSION=10.0.130-1
   export CUDA_PKG_NCCL_VERSION=10.0
   export CUDA_VERSION_=10.0
   export NCCL_VERSION=2.3.4
 
-  echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+    register_local_repository;
+  else
+    register_remote_repository;
+  fi
 
-  #echo 'deb file:///var/cuda-repo-10-0-local-10.0.130-410.48 /' >> /etc/apt/sources.list.d/cuda-repo-10-0-local-10.0.130-410.48.list
-  
-  echo 'deb file:///var/nccl-repo-2.3.4-ga-cuda10.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.3.4-ga-cuda10.0.list
-
-  #apt-key add /var/cuda-repo-9-2-local/7fa2af80.pub
-
-  sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
   sudo apt update
-  msg "Installing Cuda Toolkit $VERSION"
-  sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-          cuda-compat-10-0=410.48-1 \
-          cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-documentation-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cupti-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          cuda-nvcc-$CUDA_VERSION 
-          
-          #cuda-compat-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
-
+  install_cuda_packages;
 }
 
-install_cuda_9_2() {
-
+install_cuda_9_2() 
+{
   export CUDA_VERSION=9-2
   export CUDA_PKG_VERSION=9.2.148-1
   export CUDA_PKG_NCCL_VERSION=9.2
   export CUDA_VERSION_=9.2
   export NCCL_VERSION=2.3.4
 
-  echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+    register_local_repository;
+  else
+    register_remote_repository;
+  fi
 
-  #echo 'deb file:///var/cuda-repo-9-2-local /' >> /etc/apt/sources.list.d/cuda-repo-9-2-local.list
-  #echo 'deb file:///var/cuda-repo-9-2-local-cublas-update-1 /' >> /etc/apt/sources.list.d/cuda-repo-9-2-local-cublas-update-1.list
-
-  echo 'deb file:///var/nccl-repo-2.3.4-ga-cuda9.2 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.3.4-ga-cuda9.2.list
-  echo 'deb file:///var/nv-tensorrt-repo-cuda9.2-ga-trt4.0.1.6-20180612 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-cuda9.2-ga-trt4.0.1.6-20180612.list
-
-  #apt-key add /var/cuda-repo-9-2-local/7fa2af80.pub
-
-  sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
   sudo apt update
-  msg "Installing Cuda Toolkit $VERSION"
-  
-  sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-          cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-documentation-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cupti-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          cuda-nvcc-$CUDA_VERSION #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+  install_cuda_packages;
 }
 
-install_cuda_9_1() {
-
+install_cuda_9_1() 
+{
   export CUDA_VERSION=9-1
   export CUDA_PKG_VERSION=9.1.85-1
   export CUDA_PKG_NCCL_VERSION=9.1
   export CUDA_VERSION_=9.1
   export NCCL_VERSION=2.1.15
 
-  echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
-  
-  #echo 'deb file:///var/cuda-repo-9-1-local /'v/etc/apt/sources.list.d/cuda-repo-9-1-local.list
-  #echo 'deb file:///var/cuda-repo-9-1-local-compiler-update-1 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-1-local-compiler-update-1.list
-  #echo 'deb file:///var/cuda-repo-9-1-local-cublas-performance-update-1 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-1-local-cublas-performance-update-1 .list
-  #echo 'deb file:///var/cuda-repo-9-1-local-cublas-performance-update-3 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-1-local-cublas-performance-update-3.list
-  
-  echo 'deb file:///var/nccl-repo-2.1.15-ga-cuda9.1 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.1.15-ga-cuda9.1.list
+  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+    register_local_repository
+  else
+    register_remote_repository;    
+  fi
 
-  #echo 'deb file:///var/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208.list
-
-  #apt-key add /var/cuda-repo-9-1-local/7fa2af80.pub
-
-  sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
   sudo apt update
-  msg "Installing Cuda Toolkit $VERSION"
-  sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-          cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          cuda-nvcc-$CUDA_VERSION #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
-
-  #its not a certified repository so need to be installed manually
-  #dpkg -i /var/nccl-repo-2.2.12-ga-cuda9.1/libnccl2_${NCCL_VERSION}'-1+cuda'${CUDA_PKG_NCCL_VERSION}_amd64.deb
-  #dpkg -i /var/nccl-repo-2.2.12-ga-cuda9.1/libnccl-dev_${NCCL_VERSION}'-1+cuda'${CUDA_PKG_NCCL_VERSION}_amd64.deb
+  install_cuda_packages;
 }
 
-install_cuda_9_0() {
-
+install_cuda_9_0() 
+{
   export CUDA_VERSION=9-0
   export CUDA_PKG_VERSION=9.0.176-1
   export CUDA_PKG_NCCL_VERSION=9.0
   export CUDA_VERSION_=9.0
   export NCCL_VERSION=2.3.4
 
-  echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
-  
-  #echo 'deb file:///var/cuda-repo-9-0-local /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local.list
-  #echo 'deb file:///var/cuda-repo-9-0-local-cublas-performance-update /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local-cublas-performance-update.list
-  #echo 'deb file:///var/cuda-repo-9-0-local-cublas-performance-update-2 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local-cublas-performance-update-2.list
-  #echo 'deb file:///var/cuda-repo-9-0-local-cublas-performance-update-3 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-9-0-local-cublas-performance-update-3.list
-  #echo 'deb file:///var/cuda-repo-9-0-176-local-patch-4 /' | sudo tee -a /etc/apt/sources.list.d/cuda-repo-9-0-176-local-patch-4.list
-  
-  echo 'deb file:///var/nccl-repo-2.3.4-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.3.4-ga-cuda9.0.list
-  #echo 'deb file:///var/nccl-repo-2.2.13-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.13-ga-cuda9.0.list
-  #echo 'deb file:///var/nccl-repo-2.2.12-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.12-ga-cuda9.0.list
-  #echo 'deb file:///var/nccl-repo-2.1.15-ga-cuda9.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.1.15-ga-cuda9.0.list
-  
-  echo 'deb file:///var/nv-tensorrt-repo-cuda9.0-ga-trt4.0.1.6-20180612 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-cuda9.0-ga-trt4.0.1.6-20180612.list
-  #echo 'deb file:///var/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208.list
+  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+    register_local_repository;
+  else
+    register_remote_repository;
+  fi
 
-  #apt-key add /var/cuda-repo-9-0-local/7fa2af80.pub
-
-  sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
-  sudo apt update
-  msg "Installing Cuda Toolkit $VERSION"
-  sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-          cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-core-9-0=9.0.176.3-1 \
-          cuda-cublas-9-0=9.0.176.4-1 \
-          cuda-cublas-dev-9-0=9.0.176.4-1 \
-          cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+  sudo apt update;
+  install_cuda_packages;
 }
 
-install_cuda_8_0() {
-
+install_cuda_8_0() 
+{
   export CUDA_VERSION=8-0
   export CUDA_PKG_VERSION=8.0.61-1
   export CUDA_PKG_NCCL_VERSION=8.0
   export CUDA_VERSION_=8.0
   export NCCL_VERSION=2.2.13
 
-  echo 'deb file:///var/machine-learning-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb file:///var/cuda-repo-local-ubuntu1604 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+    register_local_repository;
+  else
+    register_remote_repository;
+  fi
 
-  #echo 'deb file:///var/cuda-repo-8-0-local-ga2 /' | sudo tee /etc/apt/sources.list.d/cuda-repo-8-0-local-ga2.list
-  #echo 'deb file:///var/cuda-repo-8-0-local-cublas-performance-update /' | sudo tee /etc/apt/sources.list.d/cuda-repo-8-0-local-cublas-performance-update.list
-  
-  echo 'deb file:///var/nccl-repo-2.2.13-ga-cuda8.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.13-ga-cuda8.0.list
-  #echo 'deb file:///var/nccl-repo-2.2.12-ga-cuda8.0 /' | sudo tee /etc/apt/sources.list.d/nccl-repo-2.2.12-ga-cuda8.0.list
-  
-  echo 'deb file:///var/nv-tensorrt-repo-cuda8.0-ga-trt4.0.1.6-20180612 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-cuda8.0-ga-trt4.0.1.6-20180612.list
-  ##echo 'deb file:///var/nv-tensorrt-repo-ga-cuda8.0-trt3.0.4-20180208 /' | sudo tee /etc/apt/sources.list.d/nv-tensorrt-repo-ga-cuda8.0-trt3.0.4-20180208.list
-  
-  #apt-key add /var/cuda-repo-8-0-local-ga2/7fa2af80.pub
-
-  sudo apt-key add /var/cuda-repo-local-ubuntu1604/7fa2af80.pub
-  sudo apt update
-
-  msg "Installing Cuda Toolkit $VERSION"
-  sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-          cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvrtc-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvrtc-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvgraph-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvgraph-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cusolver-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cusolver-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cublas-8-0=8.0.61.2-1 \
-          cuda-cublas-dev-8-0=8.0.61.2-1 \
-          cuda-cufft-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cufft-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-curand-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-curand-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cusparse-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cusparse-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-npp-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-npp-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-core-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-misc-headers-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-driver-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-          libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-          libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
-
-  # Bazel may not find this file so I created a symlink
-  # cd /usr/local/cuda-8.0/nvvm/libdevice
-  # sudo ln -s libdevice.compute_50.10.bc libdevice.10.bc
-  sudo ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_30.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc
+  sudo apt update;
+  install_cuda_packages;
 }
 
-install_cuda() {
+install_cuda() 
+{
   if [[ $VERSION == "8.0" ]];
   then
     install_cuda_8_0;
@@ -340,9 +419,9 @@ install_cuda() {
   fi
 }
 
-register_libraries_path() {
+register_libraries_path() 
+{
   # PATH for CUDA
-
   #LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
   #LIBRARY_PATH /usr/local/cuda/lib64/stubs
 
@@ -361,8 +440,39 @@ register_libraries_path() {
   #chown ubuntu:ubuntu $HOME/.profile
 }
 
-install_cudnn7() {
+install_cudnn7()
+{
+  if [[ $VERSION == "9.0" || $VERSION == "10.0" ]];then
+    #compatible with 9.0 and 10.0
+    export CUDNN_PKG_VERSION=7.3.0.29
+  elif [[ $VERSION == "8.0" || $VERSION == "9.2" ]]; then
+    #compatible with 8.0 and 9.2
+    export CUDNN_PKG_VERSION=7.2.1.38
+  elif [[ $VERSION == "9.1" ]]; then
+    #compatible with 9.1
+    export CUDNN_PKG_VERSION=7.1.3.16
+  fi
+  
+  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+    sudo dpkg -i /var/machine-learning-repo-local-ubuntu1604/libcudnn7_${CUDNN_PKG_VERSION}'-1 cuda'${CUDA_VERSION_}_amd64.deb
+    sudo dpkg -i /var/machine-learning-repo-local-ubuntu1604/libcudnn7-dev_${CUDNN_PKG_VERSION}'-1 cuda'${CUDA_VERSION_}_amd64.deb
+    
+    #dpkg -i /var/cuda-packages/cuDNN/${CUDNN_PKG_VERSION}/libcudnn7_${CUDNN_PKG_VERSION}'-1+cuda'${CUDA_VERSION_}_amd64.deb
+    #dpkg -i /var/cuda-packages/cuDNN/${CUDNN_PKG_VERSION}/libcudnn7-dev_${CUDNN_PKG_VERSION}'-1+cuda'${CUDA_VERSION_}_amd64.deb
+    
+    #dpkg -i /var/machine-learning-repo-local/libcudnn7_${CUDNN_PKG_VERSION}
+    # Fix for Tensorflow (cuda 9.0 and cuda 9.1)
+    #ln -s /usr/lib/x86_64-linux-gnu /usr/local/cuda/lib
+  else
+    sudo apt install -y --no-install-recommends \
+                      libcudnn7=${CUDNN_PKG_VERSION}-1+cuda${VERSION} \
+                      libcudnn7-dev=${CUDNN_PKG_VERSION}-1+cuda${VERSION}
+  fi
+}
 
+
+install_cudnn() 
+{
   #cuDNN Installation
   #export CUDNN_PKG_VERSION=7.0.5.15
   #export CUDNN_PKG_VERSION=7.1.1.5
