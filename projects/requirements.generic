@@ -3,10 +3,13 @@ numpy
 scipy
 matplotlib
 jupyterlab
+git+https://github.com/jupyter/jupyter_console.git
 ipyparallel
 ipykernel
 ipywidgets
 jupyter_contrib_nbextensions
 notebook==5.6.0
 jupyter-client==5.2.3
+jupyterlab_latex
+jupyter-toolkit==2.0.4
 #RISE
