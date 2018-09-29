@@ -168,10 +168,12 @@ build()
     update_mkl_dnn_sources;
     update_pytorch_sources;
     update_torchvision_sources;
+    update_tochtext_sources
 
     build_mkl_dnn_sources;
     build_pytorch_sources;
     build_torchvision_sources;
+    build_torchtext_sources
     
     pip install --user torchtext
 }
