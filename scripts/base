@@ -40,8 +40,8 @@ sudo apt install -yq --no-install-recommends \
                          build-essential \
                          apt-file \
                          pkg-config \
-                         gfortran \
-                         libz-dev gettext
+                         gfortran
+                         
 
 msg "Updating cmake"
 cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
@@ -56,6 +56,7 @@ sudo cp -R ./man /usr/share/
 cd .. && rm -rf $HOME/$cmake_folder
 
 msg "Building and Installing Git (2.19.0)"
+sudo apt install -y libz-dev gettext libcurl4-openssl-dev
 cd $HOME
 wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.19.0.tar.xz
 tar -xf git-2.19.0.tar.xz 
