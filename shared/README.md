@@ -1,1 +1,1 @@
-this folder serves to pass files between containers only
+This folder purpose is just to share common files between Host and Guest(s) nothing more.

@@ -1,1 +1,1 @@
-scripts to launch and configure containers
+Here is a collection of scripts to launch and build resources inside the containers

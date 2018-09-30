@@ -1,2 +1,1 @@
-create one folder for each projects here...
-its the folder that jupyter / jupyterlab can see.
+This folder purpose is to separate projects , it's where jupyterlab or jupyter notebook will be limited to.
