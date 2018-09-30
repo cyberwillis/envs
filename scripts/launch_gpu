@@ -22,7 +22,7 @@ launch() {
     UTILS=$PWD/../utils;
     SHARED=$PWD/../shared;
     NVIDIA_REPO_LOCAL=$REPOSITORY/nvidia-repo-local;
-    NVIDIA_REPO_MIRROR=$REPOSITORY/nvidia-repo-mirror/compute;
+    NVIDIA_REPO_MIRROR=$REPOSITORY/nvidia-repo-mirror;
 
     msg "Launching container: ($MACHINE_CONTAINER), cuda version: ($CUDA_VERSION), linux version: ($MACHINE_BASE)";
     msg "Defining maps"
@@ -47,74 +47,9 @@ launch() {
       lxc config set $MACHINE_CONTAINER nvidia.require.cuda "cuda>=$CUDA_VERSION";
       lxc config show $MACHINE_CONTAINER | sed "s/^description:.*/description: cuda-$CUDA_VERSION/" | lxc config edit $MACHINE_CONTAINER;
 
-
+      #NVIDIA-MIRROR-REPOSITORY
       if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-
-        if [[ $CUDA_VERSION == "10.0" ]];then
-            # Cuda 10.0
-            lxc config device add $MACHINE_CONTAINER cuda-repo-10-0-local                  disk source=$NVIDIA_REPO_LOCAL/cuda-repo-10-0-local-10.0.130-410.48            path=/var/cuda-repo-10-0-local-10.0.130-410.48;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-10-0-local-nccl2.3.4        disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.3.4-ga-cuda10.0                      path=/var/nccl-repo-2.3.4-ga-cuda10.0;
-        
-        elif [[ $CUDA_VERSION == "9.2" ]];then
-            # Cuda 9.2
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local                  disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-2-148-local                          path=/var/cuda-repo-9-2-148-local;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local-update-1         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-2-148-local-patch-1                  path=/var/cuda-repo-9-2-148-local-patch1;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local                  disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-2-local                              path=/var/cuda-repo-9-2-local;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local-update-1         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-2-local-cublas-update-1              path=/var/cuda-repo-9-2-local-cublas-update-1;
-            
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local-nccl2.3.4        disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.3.4-ga-cuda9.2                       path=/var/nccl-repo-2.3.4-ga-cuda9.2;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local-nccl2.2.13       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.13-ga-cuda9.2                      path=/var/nccl-repo-2.2.13-ga-cuda9.2;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local-nccl2.2.12       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.12-ga-cuda9.2                      path=/var/nccl-repo-2.2.12-ga-cuda9.2;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-2-local-tensorrt-4       disk source=$NVIDIA_REPO_LOCAL/nv-tensorrt-repo-cuda9.2-ga-trt4.0.1.6-20180612  path=/var/nv-tensorrt-repo-cuda9.2-ga-trt4.0.1.6-20180612;
-            
-            #tensorrt3
-            #tensorrt4
-        
-        elif [[ $CUDA_VERSION == "9.1" ]];then
-            # Cuda 9.1
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-1-local                  disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-1-local                              path=/var/cuda-repo-9-1-local;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-1-local-update-1         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-1-local-cublas-performance-update-1  path=/var/cuda-repo-9-1-local-cublas-performance-update-1;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-1-local-update-2         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-1-local-compiler-update-1            path=/var/cuda-repo-9-1-local-compiler-update-1;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-1-local-update-3         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-1-local-cublas-performance-update-3  path=/var/cuda-repo-9-1-local-cublas-performance-update-3;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-1-local-nccl2.1.15       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.1.15-ga-cuda9.1                      path=/var/nccl-repo-2.1.15-ga-cuda9.1;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-1-local-nccl2.2.12       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.12-ga-cuda9.1                      path=/var/nccl-repo-2.2.12-ga-cuda9.1;
-        
-        elif [[ $CUDA_VERSION == "9.0" ]];then
-            # Cuda 9.0
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local                  disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-0-local                              path=/var/cuda-repo-9-0-local;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-update-1         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-0-local-cublas-performance-update    path=/var/cuda-repo-9-0-local-cublas-performance-update;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-update-2         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-0-local-cublas-performance-update-2  path=/var/cuda-repo-9-0-local-cublas-performance-update-2;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-update-3         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-0-local-cublas-performance-update-3  path=/var/cuda-repo-9-0-local-cublas-performance-update-3;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-update-4         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-9-0-176-local-patch-4                  path=/var/cuda-repo-9-0-176-local-patch-4;
-            
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-nccl2.3.4        disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.3.4-ga-cuda9.0                       path=/var/nccl-repo-2.3.4-ga-cuda9.0;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-nccl2.2.13       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.13-ga-cuda9.0                      path=/var/nccl-repo-2.2.13-ga-cuda9.0;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-nccl2.2.12       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.12-ga-cuda9.0                      path=/var/nccl-repo-2.2.12-ga-cuda9.0;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-nccl2.1.15       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.1.15-ga-cuda9.0                      path=/var/nccl-repo-2.1.15-ga-cuda9.0;
-            
-            lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-tensorrt-4       disk source=$NVIDIA_REPO_LOCAL/nv-tensorrt-repo-cuda9.0-ga-trt4.0.1.6-20180612  path=/var/nv-tensorrt-repo-cuda9.0-ga-trt4.0.1.6-20180612;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-9-0-local-tensorrt-3       disk source=$NVIDIA_REPO_LOCAL/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208    path=/var/nv-tensorrt-repo-ga-cuda9.0-trt3.0.4-20180208;
-
-        elif [[ $CUDA_VERSION == "8.0" ]];then
-            # Cuda 8.0
-            lxc config device add $MACHINE_CONTAINER cuda-repo-8-0-local-ga2              disk source=$NVIDIA_REPO_LOCAL/cuda-repo-8-0-local-ga2                          path=/var/cuda-repo-8-0-local-ga2;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-8-0-local-update-1         disk source=$NVIDIA_REPO_LOCAL/cuda-repo-8-0-local-cublas-performance-update    path=/var/cuda-repo-8-0-local-cublas-performance-update;
-            
-            lxc config device add $MACHINE_CONTAINER cuda-repo-8-0-local-nccl2.2.13       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.13-ga-cuda8.0                      path=/var/nccl-repo-2.2.13-ga-cuda8.0;
-            #lxc config device add $MACHINE_CONTAINER cuda-repo-8-0-local-nccl2.2.12       disk source=$NVIDIA_REPO_LOCAL/nccl-repo-2.2.12-ga-cuda8.0                      path=/var/nccl-repo-2.2.12-ga-cuda8.0;
-            
-            lxc config device add $MACHINE_CONTAINER cuda-repo-8-0-local-tensorrt-4       disk source=$NVIDIA_REPO_LOCAL/nv-tensorrt-repo-cuda8.0-ga-trt4.0.1.6-20180612  path=/var/nv-tensorrt-repo-cuda8.0-ga-trt4.0.1.6-20180612;
-            lxc config device add $MACHINE_CONTAINER cuda-repo-8-0-local-tensorrt-3       disk source=$NVIDIA_REPO_LOCAL/nv-tensorrt-repo-ga-cuda8.0-trt3.0.4-20180208    path=/var/nv-tensorrt-repo-ga-cuda8.0-trt3.0.4-20180208;
-        fi
-
-        #CUDA PACKAGES
-        #http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/
-        lxc config device add $MACHINE_CONTAINER cuda-developer-ubuntu1604  disk  source=$NVIDIA_REPO_MIRROR/cuda/repos/ubuntu1604/x86_64  path=/var/cuda-repo-local-ubuntu1604;
-        lxc config device add $MACHINE_CONTAINER cuda-developer-rhel7       disk  source=$NVIDIA_REPO_MIRROR/cuda/repos/rhel7/x86_64       path=/var/cuda-repo-local-rhel7;
-        
-        #MACHINE LEARNING PACKAGES
-        #http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/
-        lxc config device add $MACHINE_CONTAINER ml-developer-download-nvidia-com     disk source=$NVIDIA_REPO_MIRROR/machine-learning/repos/ubuntu1604/x86_x64       path=/var/machine-learning-repo-local-ubuntu1604;
+        lxc config device add $MACHINE_CONTAINER nvidia-repository  disk  source=$NVIDIA_REPO_MIRROR  path=/repository
       fi
     fi
     lxc start $MACHINE_CONTAINER
