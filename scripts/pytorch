@@ -104,8 +104,9 @@ build_pytorch_sources()
     fi
     
     #TODO: save the built package into correct folder
-    mv /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old
-    cp $HOME/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}
+    mkdir -p /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old/
+    mv /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old/
+    cp $HOME/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/
     
     pip install --user $HOME/pytorch/dist/torch*.whl
     cd $HOME/pytorch/docs
