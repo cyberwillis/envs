@@ -91,10 +91,12 @@ msg() {
 
 install_nginx() {
 
-if [[ $LOCAL_REPOSITORY == 'yes' ]]; then
-sudo apt update
-sudo apt install nginx -y --no-install-recommends
-cat <<EOF | sudo tee /etc/nginx/sites-available/nvidia
+  if [[ $LOCAL_REPOSITORY == 'yes' ]]; then
+    
+    msg "Installing Repository Server Host (NGINX)"
+    sudo apt update
+    sudo apt install nginx -y --no-install-recommends
+    cat <<EOF | sudo tee /etc/nginx/sites-available/nvidia
 server {
   listen 80 default_server;
   listen [::]:80 default_server;
@@ -110,18 +112,15 @@ server {
   }
 }
 EOF
-sudo ln -s -f /etc/nginx/sites-available/nvidia /etc/nginx/sites-enabled/default
-sudo ln -s -f /repository /var/www/repository
-sudo systemctl restart nginx
-fi
-}
 
-register_mirror_repository() {
+    sudo ln -s -f /etc/nginx/sites-available/nvidia /etc/nginx/sites-enabled/default
+    sudo ln -s -f /repository /var/www/repository
+    sudo systemctl restart nginx
 
-  #Ubuntu 16.04
-  sudo apt-key adv --fetch-keys http://localhost/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-  echo "deb http://localhost/compute/cuda/repos/ubuntu1604/x86_64 /"                     | sudo tee /etc/apt/sources.list.d/cuda-mirror.list
-  echo "deb http://localhost/compute/machine-learning/repos/ubuntu1604/x86_64 /"   | sudo tee /etc/apt/sources.list.d/machine-learning-mirror.list
+    msg "Fixing internal nslookup for locahost"
+    echo "127.0.0.1	developer.download.nvidia.com" | sudo tee -a /etc/hosts
+
+  fi
 }
 
 register_remote_repository() {
@@ -130,18 +129,17 @@ register_remote_repository() {
   #echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
   #Ubuntu 18.04
   #echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
-
   #Ubuntu 16.04
-  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
   echo 'deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /'             | sudo tee /etc/apt/sources.list.d/cuda-local.list
 }
 
 install_cuda_packages() {
   if [[ $VERSION == "10.0" ]];then
 
     msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+    sudo apt install -y --allow-unauthenticated --no-install-recommends \
             cuda-compat-10-0=410.48-1 \
             cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
@@ -167,7 +165,7 @@ install_cuda_packages() {
   elif [[ $VERSION == "9.2" ]];then
     
     msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+    sudo apt install -y --allow-unauthenticated --no-install-recommends \
             cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
@@ -191,7 +189,7 @@ install_cuda_packages() {
   elif [[ $VERSION == "9.1" ]];then
 
     msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+    sudo apt install -y --allow-unauthenticated --no-install-recommends \
             cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
@@ -213,7 +211,7 @@ install_cuda_packages() {
   elif [[ $VERSION == "9.0" ]];then
 
     msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+    sudo apt install -y --allow-unauthenticated --no-install-recommends \
             cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
@@ -232,7 +230,7 @@ install_cuda_packages() {
   elif [[ $VERSION == "8.0" ]];then
 
     msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+    sudo apt install -y --allow-unauthenticated --no-install-recommends \
             cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-nvrtc-$CUDA_VERSION=$CUDA_PKG_VERSION \
             cuda-nvrtc-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
@@ -280,12 +278,7 @@ install_cuda_10_0() {
   export NCCL_VERSION=2.3.5
   #export NCCL_VERSION=2.3.4
 
-  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-    register_mirror_repository
-    #register_local_repository;
-  else
-    register_remote_repository;
-  fi
+  register_remote_repository;
 
   sudo apt update
   install_cuda_packages;
@@ -300,12 +293,7 @@ install_cuda_9_2() {
   export NCCL_VERSION=2.3.5
   #export NCCL_VERSION=2.3.4
 
-  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-    register_mirror_repository
-    #register_local_repository;
-  else
-    register_remote_repository;
-  fi
+  register_remote_repository;
 
   sudo apt update
   install_cuda_packages;
@@ -319,12 +307,7 @@ install_cuda_9_1() {
   export CUDA_VERSION_=9.1
   export NCCL_VERSION=2.1.15
 
-  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-    register_mirror_repository
-    #register_local_repository
-  else
-    register_remote_repository;    
-  fi
+  register_remote_repository;    
 
   sudo apt update
   install_cuda_packages;
@@ -339,12 +322,7 @@ install_cuda_9_0() {
   export NCCL_VERSION=2.3.5
   #export NCCL_VERSION=2.3.4
 
-  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-    register_mirror_repository
-    #register_local_repository;
-  else
-    register_remote_repository;
-  fi
+  register_remote_repository;
 
   sudo apt update;
   install_cuda_packages;
@@ -358,12 +336,7 @@ install_cuda_8_0() {
   export CUDA_VERSION_=8.0
   export NCCL_VERSION=2.2.13
 
-  if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-    register_mirror_repository
-    #register_local_repository;
-  else
-    register_remote_repository;
-  fi
+  register_remote_repository;
 
   sudo apt update;
   install_cuda_packages;
