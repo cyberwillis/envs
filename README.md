@@ -15,3 +15,7 @@ In my day by day investigation and experimentation about Data Science and Machin
 ## Why
 I started using docker to this matter but in less then a month I discovered that it was limited to my needs (create a environment to install many processes) and do Machine learning and Deep Learning using almost 100% of the Machine and GPUs. LXC doesn't rely on virtualize kernels , instead it uses the Kernel of the Bare Metal. It's like a Virtual Machine without a Kernel or a Container dependent of the Bare metal Kernel. 
 It's ephemeral as you pleased to be and you can make clusters of it to work in parallel. Again, look outside to know more about LXC and its differenced of Docker. At first I started this organization project with docker but very after I realized that I need something more consistent so I started this project and depricated the earlier.
+
+## INSTRUCTIONS
+on scripts folder change the .env file to point to correct information that will be used by scripts
+
