@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+export COMPUTE_CAPABILITY="7.0"
+
 RESET='\033[0m'
 COLOR='\033[1;32m'
 
@@ -18,7 +20,7 @@ requirements()
     #Pytorch Requirements
     sudo apt install libeigen3-dev imagemagick -y
     #mkdir -p /var/python-repo-local/3.6
-    pip download --exists-action 'w' -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
+    pip download --exists-action 'i' -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
     pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
 }
 
@@ -98,9 +100,9 @@ build_pytorch_sources()
         USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py develop --user
         USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
     else
-        TORCH_CUDA_ARCH_LIST="3.0" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py build_deps
-        TORCH_CUDA_ARCH_LIST="3.0" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py develop --user
-        TORCH_CUDA_ARCH_LIST="3.0" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
+        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py build_deps
+        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py develop --user
+        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
     fi
     
     #TODO: save the built package into correct folder
@@ -179,4 +181,5 @@ build()
     pip install --user torchtext
 }
 
+source ./.env
 build;

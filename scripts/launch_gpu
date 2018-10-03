@@ -6,6 +6,16 @@ export LOCAL_REPOSITORY='yes'
 export MACHINE_BASE="ubuntu:16.04";
 export CUDA_VERSION=10.0;
 
+export BACKUPS_FOLDER=;
+export FRAMEWORKS_FOLDER=;
+export REPOSITORY_FOLDER=;
+export PROJECTS_FOLDER=;
+export SCRIPTS_FOLDER=;
+export UTILS_FOLDER=;
+export SHARED_FOLDER=;
+export NVIDIA_REPO_LOCAL=;
+export NVIDIA_REPO_MIRROR=;
+
 RESET='\033[0m';
 COLOR='\033[1;32m';
 msg() {
@@ -14,28 +24,18 @@ msg() {
 
 launch() {
 
-    BACKUPS=$PWD/../backups;
-    FRAMEWORKS=$PWD/../frameworks;
-    REPOSITORY=$PWD/../repository;
-    PROJECTS=$PWD/../projects;
-    SCRIPTS=$PWD/../scripts;
-    UTILS=$PWD/../utils;
-    SHARED=$PWD/../shared;
-    NVIDIA_REPO_LOCAL=$REPOSITORY/nvidia-repo-local;
-    NVIDIA_REPO_MIRROR=$REPOSITORY/nvidia-repo-mirror;
-
     msg "Launching container: ($MACHINE_CONTAINER), cuda version: ($CUDA_VERSION), linux version: ($MACHINE_BASE)";
     msg "Defining maps"
     lxc launch $MACHINE_BASE $MACHINE_CONTAINER -c raw.idmap="both $UID 1000"
     lxc config set $MACHINE_CONTAINER limits.cpu 3;
 
     # Packages SDKs (DAAL / KML / IPP / TBB / MPI)
-    lxc config device add $MACHINE_CONTAINER frameworks  disk source=$FRAMEWORKS         path=/frameworks;
-    lxc config device add $MACHINE_CONTAINER projects    disk source=$PROJECTS           path=/projects;
-    lxc config device add $MACHINE_CONTAINER scripts     disk source=$SCRIPTS            path=/scripts;
-    lxc config device add $MACHINE_CONTAINER utils       disk source=$UTILS              path=/utils;
-    lxc config device add $MACHINE_CONTAINER shared      disk source=$SHARED             path=/shared;
-    lxc config device add $MACHINE_CONTAINER python      disk source=$REPOSITORY/python  path=/var/python-repo-local
+    lxc config device add $MACHINE_CONTAINER frameworks  disk source=$FRAMEWORKS_FOLDER         path=/frameworks;
+    lxc config device add $MACHINE_CONTAINER projects    disk source=$PROJECTS_FOLDER           path=/projects;
+    lxc config device add $MACHINE_CONTAINER scripts     disk source=$SCRIPTS_FOLDER            path=/scripts;
+    lxc config device add $MACHINE_CONTAINER utils       disk source=$UTILS_FOLDER              path=/utils;
+    lxc config device add $MACHINE_CONTAINER shared      disk source=$SHARED_FOLDER             path=/shared;
+    lxc config device add $MACHINE_CONTAINER python      disk source=$REPOSITORY_FOLDER/python  path=/var/python-repo-local
     lxc stop $MACHINE_CONTAINER
     
     if [[ $USE_GPU == 'yes' ]];then
@@ -49,7 +49,7 @@ launch() {
 
       #NVIDIA-MIRROR-REPOSITORY
       if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-        lxc config device add $MACHINE_CONTAINER nvidia-repository  disk  source=$NVIDIA_REPO_MIRROR  path=/repository
+        lxc config device add $MACHINE_CONTAINER nvidia-repository  disk  source=$NVIDIA_REPO_MIRROR_FOLDER  path=/repository
       fi
     fi
     lxc start $MACHINE_CONTAINER
