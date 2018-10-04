@@ -1,21 +1,48 @@
 # Envs
 
 ## A word first
-This project is just a bunch of scripts to help me organize the way I like to work in Machine learning and Deep Learning, it's not intended to be a software distribution or serves as incentive to anybody use the kind of software I like. It's just the way I like to do things.
+This project is just a bunch of scripts to help me organize my work on Machine learning and Deep Learning using container as a Desktop,
 
 ## About
-This project uses LXC/LXD as the core to launch and initialize containers to work with Data Science, Machine Learning and Deep Learning. This is also a working progress project where my goal is to be organized, learn more about the infrastruture of Containers, GPU on Containers and Local resources (Homemade Cloud).
+This project uses LXC/LXD as the core to launch and initialize containers to work with Data Science, Machine Learning and Deep Learning. 
+This is also a working progress project where my goal is get my stuff organized, while I learn about Data Science Machine Learning and Deep Learning, Cloud Computing Infrastruture whith Containers (IaaS).
 
 ## Prerequisites
-This scripts and structure assumes the machine where it will be used already have LXC/LXD server containers running. Be it built by the used or installed via deb PPA or snapcraft. I will not give instructions to do so. But feel free to ask.
+This scripts assumes the machine that will host it already have LXD/LXC REST API Server running.
+Normally it's can be installed Ubuntu/Debian related machines using Lastest Distros or using Snapcraft on Ubuntu, or even building from the [source](https://github.com/lxc/lxd/) 
 
 ## The structure
-In my day by day investigation and experimentation about Data Science and Machine Learning in General are based on this tools. I launch a container , inject the software I need on it or build inside of it and use it. I can make backups to later use or throw it away as I like. The same principles of Docker and LXC but the point is I use the way I intend not the way others want me to use. I don't care their best practices , my best practices are organized in my way of thinking and my way of customize things for my use and my needs. Not generic use. Anybody is welcome to look grab a copy use as they fit.
+In my day by day in Data Science and Artificial Intelligence I launch a container, inject the software I need on it (installing or building from source) and use it.
+
+```
+envs
+│
+├── backups
+│   └── (*just containers and image backups here*)
+├── frameworks
+│   └── (*just libraries and frameworks that need to be built*)
+├── projects
+│   └── (*many folders of projects involving DS/ML/DL*)
+├── repository
+│   └── nvidia-repository-local
+│        └── (*offline files of cuda tookit to fastest setup*)
+├── scripts
+│   └── (*bunch of shell scripts to launch and build my LXD containers*)
+├── shared
+│   └── (*folder shared beetwen the HOST and all the GUESTs*)
+└── utils
+    └── (*installer files that I may need in any GUEST*)
+```
+
 
 ## Why
-I started using docker to this matter but in less then a month I discovered that it was limited to my needs (create a environment to install many processes) and do Machine learning and Deep Learning using almost 100% of the Machine and GPUs. LXC doesn't rely on virtualize kernels , instead it uses the Kernel of the Bare Metal. It's like a Virtual Machine without a Kernel or a Container dependent of the Bare metal Kernel. 
-It's ephemeral as you pleased to be and you can make clusters of it to work in parallel. Again, look outside to know more about LXC and its differenced of Docker. At first I started this organization project with docker but very after I realized that I need something more consistent so I started this project and depricated the earlier.
+I started using docker in 2016 but I had the ideia do build containers to learn Machine Learning more easly in middle 2017, as the time passed I saw the comunity changing a lot so I started to notice latency on docker and the scenario changing, that made me think a new approach to virtualize GPU on container when I finally found LXD/LXC and started to launch container and run Machine Learning algorithms inside of it and totally like a Cloud Experience and also isolated from my own files in my Host machine.
 
 ## INSTRUCTIONS
-on scripts folder change the .env file to point to correct information that will be used by scripts
+0-Pre-Requesites (LXD/LXC) on the Host Machine
+1-clone this source
+2-copy /scripts/.env.bak to /scripts/.env
+3-on that .env file fill the blanks of your location of this structure on your SSD/HDD Disk, configuring the compute capability for you GPU and the Jupyter secret password
+4-execute the command ./launch_gpu
+
 
