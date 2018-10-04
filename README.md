@@ -39,10 +39,11 @@ envs
 I started using docker in 2016 but I had the ideia do build containers to learn Machine Learning more easly in middle 2017, as the time passed I saw the comunity changing a lot so I started to notice latency on docker and the scenario changing, that made me think a new approach to virtualize GPU on container when I finally found LXD/LXC and started to launch container and run Machine Learning algorithms inside of it and totally like a Cloud Experience and also isolated from my own files in my Host machine.
 
 ## INSTRUCTIONS
-0-Pre-Requesites (LXD/LXC) on the Host Machine
-1-clone this source
-2-copy /scripts/.env.bak to /scripts/.env
-3-on that .env file fill the blanks of your location of this structure on your SSD/HDD Disk, configuring the compute capability for you GPU and the Jupyter secret password
-4-execute the command ./launch_gpu
+
+1-Pre-Requesites (LXD/LXC) on the Host Machine
+2-clone this source
+3-copy /scripts/.env.bak to /scripts/.env
+4-on that .env file fill the blanks of your location of this structure on your SSD/HDD Disk, configuring the compute capability for you GPU and the Jupyter secret password
+5-execute the command ./launch_gpu
 
 
