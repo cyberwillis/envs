@@ -30,6 +30,5 @@ msg "Installing Cloud9"
 cd $HOME/c9sdk
 scripts/install-sdk.sh
 
-#node server.js
-#node server.js --listen 0.0.0.0 -p 8080 -a : -w /projects/_mlstudies/pytorch/PyTorchZeroToAll/
+msg "Register alias on bash"
 echo 'alias cloud9="node $HOME/c9sdk/server.js --listen 0.0.0.0 -p 8080 -a : -w ./"'  | tee -a $HOME/.bashrc
