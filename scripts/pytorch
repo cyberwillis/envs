@@ -1,5 +1,15 @@
 #!/bin/bash -e
 
+
+echo "   ___      _____               _      ";
+echo "  / _ \_   /__   \___  _ __ ___| |__   ";
+echo " / /_)/ | | |/ /\/ _ \| '__/ __| '_ \  ";
+echo "/ ___/| |_| / / | (_) | | | (__| | | | ";
+echo "\/     \__, \/   \___/|_|  \___|_| |_| ";
+echo "       |___/                           ";
+
+
+
 export COMPUTE_CAPABILITY="7.0"
 
 RESET='\033[0m'
@@ -100,9 +110,9 @@ build_pytorch_sources()
         USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py develop --user
         USE_CUDA=OFF NO_CUDA=1 NO_CUDNN=1 NO_SYSTEM_NCCL=1 WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
     else
-        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py build_deps
-        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py develop --user
-        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
+        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" NO_TEST=1 USE_MKLDNN=1 WITH_DISTRIBUTED=1 python3 setup.py build_deps
+        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" NO_TEST=1 USE_MKLDNN=1 WITH_DISTRIBUTED=1 python3 setup.py develop --user
+        TORCH_CUDA_ARCH_LIST="$COMPUTE_CAPABILITY" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" NO_TEST=1 USE_MKLDNN=1 WITH_DISTRIBUTED=1 python3 setup.py bdist_wheel
     fi
     
     #TODO: save the built package into correct folder

@@ -1,0 +1,35 @@
+#!/bin/bash -e
+
+echo "   ___ _                 _  ___   ";
+echo "  / __\ | ___  _   _  __| |/ _ \  ";
+echo " / /  | |/ _ \| | | |/ _\` | (_) | ";
+echo "/ /___| | (_) | |_| | (_| |\__, | ";
+echo "\____/|_|\___/ \__,_|\__,_|  /_/  ";
+echo "                                  ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+cd $HOME
+
+if [[ -d "$HOME/c9sdk" ]];
+then
+    msg "Updating Cloud9"
+    cd $HOME/c9sdk
+    git pull
+else
+    msg "Clonning Cloud9"
+    git clone --recurse https://github.com/c9/core.git c9sdk 
+fi
+
+msg "Installing Cloud9"
+cd $HOME/c9sdk
+scripts/install-sdk.sh
+
+#node server.js
+#node server.js --listen 0.0.0.0 -p 8080 -a : -w /projects/_mlstudies/pytorch/PyTorchZeroToAll/
+echo 'alias cloud9="node $HOME/c9sdk/server.js --listen 0.0.0.0 -p 8080 -a : -w ./"'  | tee -a $HOME/.bashrc
