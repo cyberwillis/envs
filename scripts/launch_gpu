@@ -16,6 +16,8 @@ export SHARED_FOLDER=;
 export NVIDIA_REPO_LOCAL=;
 export NVIDIA_REPO_MIRROR=;
 
+source ./.env
+
 RESET='\033[0m';
 COLOR='\033[1;32m';
 msg() {

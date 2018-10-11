@@ -61,7 +61,7 @@ traitlets
 wcwidth
 wheel
 bcolz
-prompt_toolkit==1.0.15
+prompt_toolkit
 pytest
 opencv-python
 graphviz

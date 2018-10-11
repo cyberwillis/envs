@@ -50,22 +50,22 @@ msg "Generating jupyterlab configuration file" #msg "Fixing Avahi multi-task lim
 jupyter-notebook --generate-config -y
 
 msg "Enabling labextentions"
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
+#jupyter labextension install @jupyter-widgets/jupyterlab-manager
 
 msg "Enabling LaTex in jupyterlab"
-jupyter labextension install @jupyterlab/latex
+#jupyter labextension install @jupyterlab/latex
 
 msg "Enabling html render"
-jupyter labextension install @mflevine/jupyterlab_html
+#jupyter labextension install @mflevine/jupyterlab_html
 
 msg "Drawer for schemes"
-jupyter labextension install jupyterlab-drawio
+#jupyter labextension install jupyterlab-drawio
 
 msg "Enabling Plotly in jupyterlab"
-jupyter labextension install @jupyterlab/plotly-extension
+#jupyter labextension install @jupyterlab/plotly-extension
 
 msg "Enabling Bokeh"
-jupyter labextension install jupyterlab_bokeh
+#jupyter labextension install jupyterlab_bokeh
 
 # How to create a secure ssl / ssh server using certificate
 openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout $HOME/.ssh/jupyter.pem -out $HOME/.ssh/jupyter.pem
