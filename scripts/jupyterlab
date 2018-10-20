@@ -13,18 +13,36 @@ COLOR='\033[1;32m'
 msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
+cd $HOME
+if [[ "$#" -gt 0 ]];then
+  echo "OK"
+  PYTHON_VERSION="$1"
+  
+  export PYENV_ROOT=$HOME/.pyenv
+  export PATH=$PYENV_ROOT/bin:$PATH
+  eval "$(pyenv init -)"
 
-export PATH=$HOME/.local/bin:$PATH
-export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
-export PYTHON_BIN_PATH=/usr/bin/python3
-export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+  pyenv local $PYTHON_VERSION
 
-#msg "Installing Pre-requisites for docs"
-#sudo apt-get -qy install pandoc texlive-xetex
+  export PATH=$HOME/.local/bin:$PATH
+
+  export PYTHONPATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
+  #export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+
+  export PYTHON_BIN_PATH=/home/ubuntu/.pyenv/shims/python
+  #export PYTHON_BIN_PATH=/usr/bin/python3
+
+  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
+  #export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+  #msg "Installing Pre-requisites for docs"
+  #sudo apt-get -qy install pandoc texlive-xetex
+fi
 
 msg "Installing Jupyterlab"
 
 #mkdir -p /var/python-repo-local/3.6
+cd $HOME
 pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/3.6 
 pip install --upgrade --user -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
 
@@ -68,15 +86,18 @@ msg "Enabling Bokeh"
 #jupyter labextension install jupyterlab_bokeh
 
 # How to create a secure ssl / ssh server using certificate
-openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout $HOME/.ssh/jupyter.pem -out $HOME/.ssh/jupyter.pem
+
 # https://ipython.org/ipython-doc/3/notebook/public_server.html
 echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl --user'" | tee -a $HOME/.bashrc
 echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision --user'" | tee -a $HOME/.bashrc
 echo "export JUPYTER_PORT=8888"  | tee -a $HOME/.bashrc
 source /scripts/.env
 echo "export JUPYTER_SECRET=$JUPYTER_SECRET" | tee -a $HOME/.bashrc
-echo 'alias jbook="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --certfile=$HOME/.ssh/jupyter.pem --allow-root"'  | tee -a $HOME/.bashrc
-echo "alias jlab=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.password='sha1:\$JUPYTER_SECRET'  --NotebookApp.notebook_dir=/projects --certfile=$HOME/.ssh/jupyter.pem --allow-root \" " | tee -a $HOME/.bashrc
+#openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout $HOME/.ssh/jupyter.pem -out $HOME/.ssh/jupyter.pem
+#echo 'alias jbookc="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --certfile=$HOME/.ssh/jupyter.pem --allow-root"'  | tee -a $HOME/.bashrc
+#echo "alias jlabc=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.password='sha1:\$JUPYTER_SECRET'  --NotebookApp.notebook_dir=/projects --certfile=$HOME/.ssh/jupyter.pem --allow-root \" " | tee -a $HOME/.bashrc
+echo 'alias jbook="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
+echo "alias jlab=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.password='sha1:\$JUPYTER_SECRET'  --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
 echo 'alias jbookt="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
 echo "alias jlabt=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
 

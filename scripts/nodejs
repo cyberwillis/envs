@@ -7,6 +7,8 @@ echo "/ /\  / (_) | (_| |  __/\_/ /\__ \ ";
 echo "\_\ \/ \___/ \__,_|\___\___/ |___/ ";
 echo "                                   ";
 
+export FROM_SOURCE='yes'
+
 RESET='\033[0m'
 COLOR='\033[1;32m'
 
@@ -20,11 +22,18 @@ install_binary(){
   #only works for python3.5/python2.7 pre-installed
   # [DEPRECATED until resolution of the community]
   # This way creates a problem that the packages folder will need previleges (sudo)
-  curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+  #curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+  #sudo apt update
+  #sudo apt install -y --no-install-recommends nodejs
+  #sudo npm i -g npm
+  #sudo chown -R $USER:$(id -gn $USER) $HOME/.config
+
+  wget -qO- https://deb.nodesource.com/setup_8.x | sudo -E bash -
   sudo apt update
   sudo apt install -y --no-install-recommends nodejs
   sudo npm i -g npm
   sudo chown -R $USER:$(id -gn $USER) $HOME/.config
+
 }
 
 install_from_source(){
@@ -50,5 +59,14 @@ install_from_source(){
   export PATH=$HOME/.local/bin:$PATH
 }
 
-#install_binary;
-install_from_source;
+if [[ "$#" -gt 0 ]];then
+  FROM_SOURCE="$1"
+fi
+
+
+if [[ $FROM_SOURCE == 'yes' ]];then
+  install_from_source;
+else
+  install_binary;
+fi
+

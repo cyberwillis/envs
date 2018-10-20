@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+echo "     __        _     _ _               ___          _        ";
+echo "  /\ \ \__   _(_) __| (_) __ _        / __\   _  __| | __ _  ";
+echo " /  \/ /\ \ / / |/ _\` | |/ _\` |_____ / / | | | |/ _\` |/ _\` | ";
+echo "/ /\  /  \ V /| | (_| | | (_| |_____/ /__| |_| | (_| | (_| | ";
+echo "\_\ \/    \_/ |_|\__,_|_|\__,_|     \____/\__,_|\__,_|\__,_| ";
+echo "                                                             ";
+echo "           _                                                 ";
+echo "  _____  _| |_ _ __ __ _                                     ";
+echo " / _ \ \/ / __| '__/ _\` |                                    ";
+echo "|  __/>  <| |_| | | (_| |                                    ";
+echo " \___/_/\_\\__|_|  \__,_|                                    ";
+echo "                                                             ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+msg "Installing Nvidia-Driver"
+sudo add-apt-repository ppa:graphics-drivers/ppa -y
+sudo apt-get update
+sudo apt install -y --allow-unauthenticated --no-install-recommends cuda-drivers
+#                  libcuda1-410 \
+#                  libxnvctrl0 \
+#                  nvidia-410 \
+#                  nvidia-410-dev \
+#                  nvidia-libopencl1-410 \
+#                  nvidia-opencl-icd-410 \
+#                  nvidia-settings

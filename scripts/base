@@ -21,7 +21,7 @@ sudo sed -i.bak 's=APT::Periodic::Unattended-Upgrade "1";=APT::Periodic::Unatten
 
 msg "Upgrading packages once"
 sudo apt update
-sudo apt remove lxd lxd-client -y
+sudo apt remove lxd lxd-client liblxc1 lxcfs -y
 sudo apt upgrade -y
 
 msg "Installing Generic Tools and Applying some fixes"
@@ -40,8 +40,8 @@ sudo apt install -yq --no-install-recommends \
                          build-essential \
                          apt-file \
                          pkg-config \
-                         gfortran
-                         
+                         gfortran \
+                         git
 
 msg "Updating cmake"
 cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
@@ -55,23 +55,6 @@ sudo cp -R ./doc /usr/share/
 sudo cp -R ./man /usr/share/
 cd .. && rm -rf $HOME/$cmake_folder
 
-msg "Building and Installing Git (2.19.0)"
-sudo apt install -y libz-dev gettext libcurl4-openssl-dev
-cd $HOME
-wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.19.0.tar.xz
-tar -xf git-2.19.0.tar.xz 
-cd git-2.19.0
-./configure
-make -j4
-sudo make install
-
-msg "Updating gcc and g++"
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-sudo apt update
-sudo apt install -y gcc-6 gcc-7 gcc-8 g++-6 g++-7 g++-8
-sudo ln -s -f /usr/bin/gcc-7 /usr/bin/gcc
-sudo ln -s -f /usr/bin/g++-7 /usr/bin/g++
-
 sudo apt autoremove -y
 #sudo apt-file update
 sudo sed -i.bak "s=rlimit-nproc\=3=#rlimit-nproc\=3=g" /etc/avahi/avahi-daemon.conf
@@ -79,3 +62,5 @@ sudo sed -i.bak "s=rlimit-nproc\=3=#rlimit-nproc\=3=g" /etc/avahi/avahi-daemon.c
 msg "Fixing container locales"
 sudo locale-gen en_US.UTF-8
 #sudo apt-get install -yq --no-install-recommends language-pack-en
+
+echo "cd $HOME" | tee -a $HOME/.bashrc

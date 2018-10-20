@@ -1,0 +1,38 @@
+#!/bin/bash -e
+
+echo "   ___                  __                  _     _ _             ";
+echo "  / _ \_ __ ___        /__\ ___  __ _ _   _(_)___(_) |_ ___  ___  ";
+echo " / /_)/ '__/ _ \_____ / \/// _ \/ _\` | | | | / __| | __/ _ \/ __| ";
+echo "/ ___/| | |  __/_____/ _  \  __/ (_| | |_| | \__ \ | ||  __/\__ \ ";
+echo "\/    |_|  \___|     \/ \_/\___|\__, |\__,_|_|___/_|\__\___||___/ ";
+echo "                                   |_|                            ";
+echo "           _                                                      ";
+echo "  _____  _| |_ _ __ __ _                                          ";
+echo " / _ \ \/ / __| '__/ _\` |                                         ";
+echo "|  __/>  <| |_| | | (_| |                                         ";
+echo " \___/_/\_\\__|_|  \__,_|                                         ";
+echo "                                                                  ";
+
+RESET='\033[0m'
+COLOR='\033[1;32m'
+
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}"
+}
+
+msg "Building and Installing Git (2.19.0)"
+sudo apt install -y libz-dev gettext libcurl4-openssl-dev
+cd $HOME
+wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.19.0.tar.xz
+tar -xf git-2.19.0.tar.xz 
+cd git-2.19.0
+./configure
+make -j4
+sudo make install
+
+#msg "Updating gcc and g++"
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+sudo apt update
+sudo apt install -y gcc-6 gcc-7 gcc-8 g++-6 g++-7 g++-8
+sudo ln -s -f /usr/bin/gcc-7 /usr/bin/gcc
+sudo ln -s -f /usr/bin/g++-7 /usr/bin/g++

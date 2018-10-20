@@ -5,5 +5,9 @@ frameworks/*
 repository/*
 utils/*
 shared/*
+data/*
 _*
 .c9
+.vscode
+.ipynb_checkpoints/*
+.python-version

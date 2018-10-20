@@ -60,6 +60,7 @@ export VERSION=10.0
 export LOCAL_REPOSITORY='yes'
 export PLATFORM='ubuntu1604'
 export IP=$(ip route get 8.8.8.8 | head -1 | cut -d" " -f8)
+export INSTALL_DRIVER='no'
 
 #http://www.dreamsyssoft.com/unix-shell-scripting/ifelse-tutorial.php
 if [[ "$#" -gt 0 ]];then
@@ -69,10 +70,15 @@ if [[ "$#" -gt 0 ]];then
     LOCAL_REPOSITORY="$2"
   fi
 
+  #if [[ "$#" -gt 2 ]];then
+  #  INSTALL_DRIVER="$3"
+  #fi
+
   #TODO: future implementation of 'ubuntu' and 'rhel'
   if [[ "$#" -gt  2 ]];then
     PLATFORM="$3"
   fi
+  
 fi
 
 echo "     __        _     _ _               ___          _        ";
@@ -130,9 +136,13 @@ register_remote_repository() {
   #Ubuntu 18.04
   #echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
   #Ubuntu 16.04
-  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-  echo 'deb http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /' | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /'             | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/$PLATFORM/x86_64/7fa2af80.pub
+  echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$PLATFORM/x86_64 /" | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+  echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$PLATFORM/x86_64 /"             | sudo tee /etc/apt/sources.list.d/cuda-local.list
+
+  #if [[ $INSTALL_DRIVER == 'yes' ]];then
+  #  install_driver;
+  #fi
 }
 
 install_cuda_packages() {
@@ -366,7 +376,12 @@ register_libraries_path() {
   # PATH for CUDA
   #LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
   #LIBRARY_PATH /usr/local/cuda/lib64/stubs
-
+  export PATH=/usr/local/cuda/bin:${PATH}
+  export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+  export LIBRARY_PATH=/usr/local/cuda/lib64/stubs
+  export CUPIT_LIB_PATH=/usr/local/cuda/extras/CUPTI/lib64/
+  export LD_LIBRARY_PATH=${CUPIT_LIB_PATH}:$LD_LIBRARY_PATH
+  
   echo 'export PATH=/usr/local/cuda/bin:${PATH}' | tee -a $HOME/.bashrc
   echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' | tee -a $HOME/.bashrc
   echo 'export LIBRARY_PATH=/usr/local/cuda/lib64/stubs' | tee -a $HOME/.bashrc
