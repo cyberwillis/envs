@@ -68,11 +68,7 @@ launch() {
       fi
     fi
     lxc start $MACHINE_CONTAINER
-    sleep 10s;export PYTHON_VERSION=3.6.6;
-export JAVASCRIT_KERNEL='no';
-export JULIA_KERNEL='no'
-export R_KERNEL='no'
-export OCTAVE_KERNEL='no'
+    sleep 10s;
 }
 
 #verify_install 'base' '/projects/_lxc/console/base.sh'
