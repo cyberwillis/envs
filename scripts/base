@@ -41,7 +41,7 @@ sudo apt install -yq --no-install-recommends \
                          apt-file \
                          pkg-config \
                          gfortran \
-                         git
+                         git mercurial
 
 msg "Updating cmake"
 cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
@@ -55,7 +55,7 @@ sudo cp -R ./doc /usr/share/
 sudo cp -R ./man /usr/share/
 cd .. && rm -rf $HOME/$cmake_folder
 
-sudo apt autoremove -y
+sudo apt autoremove -qy
 #sudo apt-file update
 sudo sed -i.bak "s=rlimit-nproc\=3=#rlimit-nproc\=3=g" /etc/avahi/avahi-daemon.conf
 
