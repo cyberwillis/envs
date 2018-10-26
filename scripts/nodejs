@@ -30,7 +30,7 @@ install_binary(){
 
   wget -qO- https://deb.nodesource.com/setup_8.x | sudo -E bash -
   sudo apt update
-  sudo apt install -y --no-install-recommends nodejs
+  sudo apt install -yq --no-install-recommends nodejs
   sudo npm i -g npm
   sudo chown -R $USER:$(id -gn $USER) $HOME/.config
 
@@ -39,7 +39,7 @@ install_binary(){
 install_from_source(){
 
   sudo apt update
-  sudo apt install python-minimal -y
+  sudo apt install python-minimal -yq
   node_version=v8.11.3
   nodejs_filename=node-${node_version}.tar.gz
 
