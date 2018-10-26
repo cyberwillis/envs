@@ -50,3 +50,31 @@ jupyter labextension install @jupyterlab/plotly-extension
 
 msg "Enabling Bokeh"
 jupyter labextension install jupyterlab_bokeh
+
+msg "Jupyter Notebook as Service"
+cd $HOME
+cat <<EOF | sudo tee /lib/systemd/system/jupyter.service
+# After Ubuntu 16.04, Systemd becomes the default. 
+# It is simpler than https://gist.github.com/Doowon/38910829898a6624ce4ed554f082c4dd
+
+[Unit]
+Description=Jupyter Notebook
+
+[Service]
+Type=simple
+PIDFile=/run/jupyter.pid
+ExecStart=/bin/bash -c "/home/ubuntu/.local/bin/jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --allow-root --config=/home/ubuntu/.jupyter/jupyter_notebook_config.py"
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/
+Restart=always
+RestartSec=10
+#KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable jupyter.service
+sudo systemctl daemon-reload
+sudo systemctl restart jupyter.service

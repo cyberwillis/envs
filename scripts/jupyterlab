@@ -101,13 +101,8 @@ echo "alias jlab=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-brow
 echo 'alias jbookt="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
 echo "alias jlabt=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
 echo 'export TORCH_MODEL_ZOO=/data/torch/models' | tee -a ~/.bashrc 
+
 pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/3.6
 pip install --user -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
 
-sudo apt update
-sudo apt install -y libasio-dev mpich libopenmpi-dev libeigen3-dev graphviz
 
-cd $HOME
-git clone --recurse https://github.com/intel/mkl-dnn.git
-mkdir $HOME/mkl-dnn/build -p && cd $HOME/mkl-dnn/build && cmake .. && make -j8
-sudo make install && sudo ldconfig
