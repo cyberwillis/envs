@@ -65,7 +65,6 @@ mkdir $HOME/.local/lib/R/site-library -p
 export R_LIBS_USER="$HOME/.local/lib/R/site-library"
 
 echo 'export R_LIBS_USER="$HOME/.local/lib/R/site-library"' | tee -a $HOME/.bashrc
-echo 'export R_LIBS_USER="$HOME/.local/lib/R/site-library"' | tee -a $HOME/.profile
 R -e ".libPaths()"
 sudo R -e "install.packages(c('repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest'), dependencies = TRUE)"
 
