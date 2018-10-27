@@ -1,12 +1,24 @@
+# ==== REMOVED ======== #
+#mkl
+#mkl-include
+#pybind11
+# ==== END REMOVED ==== #
+# ==== DEV ============ #
+fastprogress
+pyyaml
+#https://www.python.org/dev/peps/pep-0557/#abstract
+dataclasses
+distro
+pipreqs
+pytest
+pytest-runner
+# ==== END DEV ======== #
 numpy
 pillow
-mkl
-mkl-include
 pyyaml
 cffi
 typing
 ninja
-pybind11
 scipy
 spacy
 seaborn
