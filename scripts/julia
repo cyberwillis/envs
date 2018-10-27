@@ -17,29 +17,29 @@ msg() {
 if [[ "$#" -gt 0 ]];then
   PYTHON_VERSION="$1"
   
-  export PYENV_ROOT=$HOME/.pyenv
-  export PATH=$PYENV_ROOT/bin:$PATH
+  export PYENV_ROOT=${HOME}/.pyenv
+  export PATH=${PYENV_ROOT}/bin:${PATH}
 
-  pyenv local $PYTHON_VERSION
+  pyenv local ${PYTHON_VERSION}
 
-  export PATH=$HOME/.local/bin:$PATH
-  export PYTHONPATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
-  #export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+  export PATH=${HOME}/.local/bin:${PATH}
+  export PYTHONPATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
+  #export PYTHONPATH=${HOME}/.local/lib/python3.6/site-packages
 
   export PYTHON_BIN_PATH=/home/ubuntu/.pyenv/shims/python
   #export PYTHON_BIN_PATH=/usr/bin/python3
 
-  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
+  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
   #export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
 
   #msg "Installing Pre-requisites for docs"
   #sudo apt-get -qy install pandoc texlive-xetex
 fi
 
-#export PATH=$HOME/.local/bin:$PATH
-#export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+#export PATH=${HOME}/.local/bin:${PATH}
+#export PYTHONPATH=${HOME}/.local/lib/python3.6/site-packages
 #export PYTHON_BIN_PATH=/usr/bin/python3
-#export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+#export PYTHON_LIB_PATH=${HOME}/.local/lib/python3.6/site-packages
 
 msg "Installing Julia"
 major=1
@@ -48,17 +48,17 @@ patch=0
 julia_version=${major}.${minor}
 julia_filename=julia-${julia_version}.${patch}-linux-x86_64.tar.gz
 
-mkdir -p $HOME/julia
-cd $HOME
+mkdir -p ${HOME}/julia
+cd ${HOME}
 
-if [[ ! -e "$HOME/$julia_filename" ]];
+if [[ ! -e "${HOME}/${julia_filename}" ]];
 then
-    wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_version}/${julia_filename} -O $HOME/${julia_filename}
-    tar -xf $HOME/${julia_filename} -C $HOME/julia/
-    rm $HOME/${julia_filename}
-    chown ubuntu:ubuntu $HOME/julia/ -R
-    julia_folder=$(ls $HOME/julia/)
-    sudo ln -s $HOME/julia/${julia_folder}/bin/julia /usr/bin/julia
+    wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_version}/${julia_filename} -O ${HOME}/${julia_filename}
+    tar -xf ${HOME}/${julia_filename} -C ${HOME}/julia/
+    rm ${HOME}/${julia_filename}
+    chown ubuntu:ubuntu ${HOME}/julia/ -R
+    julia_folder=$(ls ${HOME}/julia/)
+    sudo ln -s ${HOME}/julia/${julia_folder}/bin/julia /usr/bin/julia
 fi
 
 #mv /home/ubuntu/julia/${julia_folder} /home/ubuntu/julia/${julia_version}

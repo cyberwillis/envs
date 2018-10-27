@@ -14,53 +14,53 @@ msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
 
-msg "Block Periodic Updates"
+msg "Stop Automatic Periodic Updates"
 sudo sed -i.bak 's=APT::Periodic::Update-Package-Lists "1";=APT::Periodic::Update-Package-Lists "0";=g' /etc/apt/apt.conf.d/10periodic
 sudo sed -i.bak 's=APT::Periodic::Update-Package-Lists "1";=APT::Periodic::Update-Package-Lists "0";=g' /etc/apt/apt.conf.d/20auto-upgrades
 sudo sed -i.bak 's=APT::Periodic::Unattended-Upgrade "1";=APT::Periodic::Unattended-Upgrade "0";=g' /etc/apt/apt.conf.d/20auto-upgrades
 
-msg "Upgrading packages once"
-sudo apt update
-sudo apt remove lxd lxd-client liblxc1 lxcfs -y
-sudo apt upgrade -y
+msg "Updating and Upgrading Packages"
+sudo apt update  -qq
+sudo apt remove  -qqy lxd lxd-client liblxc1 lxcfs
+sudo apt upgrade -qqy
 
-msg "Installing Generic Tools and Applying some fixes"
-sudo apt install -yq --no-install-recommends \
-                         openssh-server \
-                         avahi-daemon \
-                         avahi-utils \
-                         wget \
-                         bzip2 \
-                         ca-certificates \
-                         sudo \
-                         locales \
-                         fonts-liberation \
-                         curl \
-                         nano \
-                         build-essential \
-                         apt-file \
-                         pkg-config \
-                         gfortran \
-                         git mercurial
+msg "Installing Generic Tools and Applying some Fixes"
+sudo apt install -qqy --no-install-recommends \
+                  openssh-server \
+                  avahi-daemon \
+                  avahi-utils \
+                  wget \
+                  bzip2 \
+                  ca-certificates \
+                  sudo \
+                  locales \
+                  fonts-liberation \
+                  curl \
+                  nano \
+                  build-essential \
+                  apt-file \
+                  pkg-config \
+                  gfortran \
+                  git mercurial
 
-msg "Updating cmake"
+msg "Upgrading Cmake to v3.11"
 cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
 cmake_folder=cmake-3.11.3-Linux-x86_64
-cp /utils/cmake/$cmake_filename $HOME/$cmake_filename
-tar -xf $HOME/$cmake_filename -C $HOME
-cd $HOME/$cmake_folder
+cp /utils/cmake/${cmake_filename} ${HOME}/${cmake_filename}
+tar -xf ${HOME}/${cmake_filename} -C ${HOME}
+cd ${HOME}/${cmake_folder}
 sudo cp -R ./bin /usr/
 sudo cp -R ./share /usr/
 sudo cp -R ./doc /usr/share/
 sudo cp -R ./man /usr/share/
-cd .. && rm -rf $HOME/$cmake_folder
+cd .. && rm -rf ${HOME}/${cmake_folder}
 
 sudo apt autoremove -qy
 #sudo apt-file update
 sudo sed -i.bak "s=rlimit-nproc\=3=#rlimit-nproc\=3=g" /etc/avahi/avahi-daemon.conf
 
-msg "Fixing container locales"
+msg "Fixing Locales"
 sudo locale-gen en_US.UTF-8
 #sudo apt-get install -yq --no-install-recommends language-pack-en
 
-echo "cd $HOME" | tee -a $HOME/.bashrc
+echo "cd ${HOME}" | tee -a ${HOME}/.bashrc

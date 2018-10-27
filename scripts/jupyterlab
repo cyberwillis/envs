@@ -13,26 +13,26 @@ COLOR='\033[1;32m'
 msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
-cd $HOME
+cd ${HOME}
 if [[ "$#" -gt 0 ]];then
   echo "OK"
   PYTHON_VERSION="$1"
   
-  export PYENV_ROOT=$HOME/.pyenv
-  export PATH=$PYENV_ROOT/bin:$PATH
+  export PYENV_ROOT=${HOME}/.pyenv
+  export PATH=${PYENV_ROOT}/bin:${PATH}
   eval "$(pyenv init -)"
 
-  pyenv local $PYTHON_VERSION
+  pyenv local ${PYTHON_VERSION}
 
-  export PATH=$HOME/.local/bin:$PATH
+  export PATH=${HOME}/.local/bin:${PATH}
 
-  export PYTHONPATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
+  export PYTHONPATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
   #export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
 
   export PYTHON_BIN_PATH=/home/ubuntu/.pyenv/shims/python
   #export PYTHON_BIN_PATH=/usr/bin/python3
 
-  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
+  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
   #export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
 
   #msg "Installing Pre-requisites for docs"
@@ -42,9 +42,10 @@ fi
 msg "Installing Jupyterlab"
 
 #mkdir -p /var/python-repo-local/3.6
-cd $HOME
+cd ${HOME}
 pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/3.6 
-pip install --upgrade --user -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
+pip install -U -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
+#pip install --upgrade --user -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
 
 msg "Enabling ipyparallel extension"
 ipcluster start --n=8 --ip=* --daemonize && ipcluster stop
@@ -67,42 +68,54 @@ jupyter serverextension enable jupyterlab --py --user
 msg "Generating jupyterlab configuration file" #msg "Fixing Avahi multi-task limitation between Host and Guest"
 jupyter-notebook --generate-config -y
 
-msg "Enabling labextentions"
-#jupyter labextension install @jupyter-widgets/jupyterlab-manager
-
-msg "Enabling LaTex in jupyterlab"
-#jupyter labextension install @jupyterlab/latex
-
-msg "Enabling html render"
-#jupyter labextension install @mflevine/jupyterlab_html
-
-msg "Drawer for schemes"
-#jupyter labextension install jupyterlab-drawio
-
-msg "Enabling Plotly in jupyterlab"
-#jupyter labextension install @jupyterlab/plotly-extension
-
-msg "Enabling Bokeh"
-#jupyter labextension install jupyterlab_bokeh
-
-# How to create a secure ssl / ssh server using certificate
 
 # https://ipython.org/ipython-doc/3/notebook/public_server.html
-echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl --user'" | tee -a $HOME/.bashrc
-echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision --user'" | tee -a $HOME/.bashrc
-echo "export JUPYTER_PORT=8888"  | tee -a $HOME/.bashrc
+echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl --user'" | tee -a ${HOME}/.bashrc
+echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision --user'" | tee -a ${HOME}/.bashrc
+echo "export JUPYTER_PORT=8888"  | tee -a ${HOME}/.bashrc
+
 source /scripts/.env
-echo "export JUPYTER_SECRET=$JUPYTER_SECRET" | tee -a $HOME/.bashrc
-#openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout $HOME/.ssh/jupyter.pem -out $HOME/.ssh/jupyter.pem
-#echo 'alias jbookc="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --certfile=$HOME/.ssh/jupyter.pem --allow-root"'  | tee -a $HOME/.bashrc
-#echo "alias jlabc=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.password='sha1:\$JUPYTER_SECRET'  --NotebookApp.notebook_dir=/projects --certfile=$HOME/.ssh/jupyter.pem --allow-root \" " | tee -a $HOME/.bashrc
-echo 'alias jbook="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
-echo "alias jlab=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.password='sha1:\$JUPYTER_SECRET'  --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
-echo 'alias jbookt="jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a $HOME/.bashrc
-echo "alias jlabt=\"jupyter lab --port=\$JUPYTER_PORT --ip=\$JUPYTER_IP --no-browser --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a $HOME/.bashrc
+echo "export JUPYTER_SECRET=${JUPYTER_SECRET}" | tee -a ${HOME}/.bashrc
+
+# How to create a secure ssl / ssh server using certificate
+#openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout ${HOME}/.ssh/jupyter.pem -out ${HOME}/.ssh/jupyter.pem
+#echo 'alias jbookc="jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.password=${JUPYTER_SECRET}  --NotebookApp.notebook_dir=/projects --certfile=${HOME}/.ssh/jupyter.pem --allow-root"'  | tee -a ${HOME}/.bashrc
+#echo "alias jlabc=\"jupyter lab --port=\${JUPYTER_PORT} --ip=\${JUPYTER_IP} --no-browser --NotebookApp.password='sha1:\${JUPYTER_SECRET}'  --NotebookApp.notebook_dir=/projects --certfile=${HOME}/.ssh/jupyter.pem --allow-root \" " | tee -a ${HOME}/.bashrc
+
+echo 'alias jbook="jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.password=${JUPYTER_SECRET}  --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a ${HOME}/.bashrc
+echo "alias jlab=\"jupyter lab --port=\${JUPYTER_PORT} --ip=\${JUPYTER_IP} --no-browser --NotebookApp.password='sha1:\${JUPYTER_SECRET}'  --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a ${HOME}/.bashrc
+echo 'alias jbookt="jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.notebook_dir=/projects --allow-root"'  | tee -a ${HOME}/.bashrc
+echo "alias jlabt=\"jupyter lab --port=\${JUPYTER_PORT} --ip=\${JUPYTER_IP} --no-browser --NotebookApp.notebook_dir=/projects --allow-root \" " | tee -a ${HOME}/.bashrc
 echo 'export TORCH_MODEL_ZOO=/data/torch/models' | tee -a ~/.bashrc 
 
 pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/3.6
-pip install --user -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
+pip install -U -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
+#pip install --user -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
 
+msg "Jupyter Notebook as Service"
+cd ${HOME}
+cat <<EOF | sudo tee /lib/systemd/system/jupyter.service
+# After Ubuntu 16.04, Systemd becomes the default. 
+# It is simpler than https://gist.github.com/Doowon/38910829898a6624ce4ed554f082c4dd
 
+[Unit]
+Description=Jupyter Notebook
+
+[Service]
+Type=simple
+PIDFile=/run/jupyter.pid
+ExecStart=/bin/bash -c "/home/ubuntu/.local/bin/jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.password=${JUPYTER_SECRET}  --NotebookApp.notebook_dir=/projects --allow-root --config=/home/ubuntu/.jupyter/jupyter_notebook_config.py"
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/
+Restart=always
+RestartSec=10
+#KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable jupyter.service
+sudo systemctl daemon-reload
+sudo systemctl restart jupyter.service

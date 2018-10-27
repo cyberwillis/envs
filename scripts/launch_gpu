@@ -35,48 +35,54 @@ msg() {
 
 launch() {
 
-    msg "Launching container: ($MACHINE_CONTAINER), cuda version: ($CUDA_VERSION), linux version: ($MACHINE_BASE)";
+    msg "Launching container: (${MACHINE_CONTAINER}), cuda version: (${CUDA_VERSION}), linux version: (${MACHINE_BASE})";
     msg "Defining maps"
-    lxc launch $MACHINE_BASE $MACHINE_CONTAINER -c raw.idmap="both $UID 1000"
-    #lxc config set $MACHINE_CONTAINER limits.cpu $(nproc);
+    lxc init ${MACHINE_BASE} ${MACHINE_CONTAINER} 
+
+    #[SSH Keys PerContainer]
+    #if [[ -e "${HOME}/.ssh/id_rsa.pub" ]];then
+    #  echo "#cloud-config\nssh_authorized_keys:\n - $(cat ${HOME}/.ssh/id_rsa.pub)" | lxc config set c1 user.user-data -
+    #fi
+    
+    lxc config set ${MACHINE_CONTAINER} raw.idmap "both ${UID} 1000"
+    lxc config set ${MACHINE_CONTAINER} limits.cpu 4;
 
     # Packages SDKs (DAAL / KML / IPP / TBB / MPI)
-    lxc config device add $MACHINE_CONTAINER data        disk source=$DATA_FOLDER               path=/data;
-    lxc config device add $MACHINE_CONTAINER frameworks  disk source=$FRAMEWORKS_FOLDER         path=/frameworks;
-    lxc config device add $MACHINE_CONTAINER projects    disk source=$PROJECTS_FOLDER           path=/projects;
-    lxc config device add $MACHINE_CONTAINER scripts     disk source=$SCRIPTS_FOLDER            path=/scripts;
-    lxc config device add $MACHINE_CONTAINER utils       disk source=$UTILS_FOLDER              path=/utils;
-    lxc config device add $MACHINE_CONTAINER shared      disk source=$SHARED_FOLDER             path=/shared;
-    lxc config device add $MACHINE_CONTAINER python      disk source=$REPOSITORY_FOLDER/python  path=/var/python-repo-local
-    lxc stop $MACHINE_CONTAINER
+    lxc config device add ${MACHINE_CONTAINER} data        disk source=${DATA_FOLDER}               path=/data;
+    lxc config device add ${MACHINE_CONTAINER} frameworks  disk source=${FRAMEWORKS_FOLDER}         path=/frameworks;
+    lxc config device add ${MACHINE_CONTAINER} projects    disk source=${PROJECTS_FOLDER}           path=/projects;
+    lxc config device add ${MACHINE_CONTAINER} scripts     disk source=${SCRIPTS_FOLDER}            path=/scripts;
+    lxc config device add ${MACHINE_CONTAINER} utils       disk source=${UTILS_FOLDER}              path=/utils;
+    lxc config device add ${MACHINE_CONTAINER} shared      disk source=${SHARED_FOLDER}             path=/shared;
+    lxc config device add ${MACHINE_CONTAINER} python      disk source=${REPOSITORY_FOLDER}/python  path=/var/python-repo-local
     
-    if [[ $USE_GPU == 'yes' ]];then
+    if [[ ${USE_GPU} == 'yes' ]];then
 
-      lxc config device add $MACHINE_CONTAINER gtx gpu;
+      lxc config device add ${MACHINE_CONTAINER} gtx gpu;
 
-      if [[ $INSTALL_NVIDIA_DRIVER == 'no' ]]; then
-        lxc config set $MACHINE_CONTAINER nvidia.runtime true
-        lxc config set $MACHINE_CONTAINER nvidia.driver.capabilities "all";
-        lxc config set $MACHINE_CONTAINER nvidia.require.driver ">=340";
-        lxc config set $MACHINE_CONTAINER nvidia.require.cuda "cuda>=$CUDA_VERSION";
+      if [[ ${INSTALL_NVIDIA_DRIVER} == 'no' ]]; then
+        lxc config set ${MACHINE_CONTAINER} nvidia.runtime true
+        lxc config set ${MACHINE_CONTAINER} nvidia.driver.capabilities "all";
+        lxc config set ${MACHINE_CONTAINER} nvidia.require.driver ">=340";
+        lxc config set ${MACHINE_CONTAINER} nvidia.require.cuda "cuda>=${CUDA_VERSION}";
       fi
-      lxc config show $MACHINE_CONTAINER | sed "s/^description:.*/description: cuda-$CUDA_VERSION/" | lxc config edit $MACHINE_CONTAINER;
+      lxc config show ${MACHINE_CONTAINER} | sed "s/^description:.*/description: cuda-${CUDA_VERSION}/" | lxc config edit ${MACHINE_CONTAINER};
 
       #NVIDIA-MIRROR-REPOSITORY
-      if [[ $LOCAL_REPOSITORY == 'yes' ]];then
-        lxc config device add $MACHINE_CONTAINER nvidia-repository  disk  source=$NVIDIA_REPO_MIRROR_FOLDER  path=/repository
+      if [[ ${LOCAL_REPOSITORY} == 'yes' ]];then
+        lxc config device add ${MACHINE_CONTAINER} nvidia-repository  disk  source=${NVIDIA_REPO_MIRROR_FOLDER}  path=/repository
       fi
     fi
-    lxc start $MACHINE_CONTAINER
+    lxc start ${MACHINE_CONTAINER}
     sleep 10s;
 }
 
 #verify_install 'base' '/projects/_lxc/console/base.sh'
 configure() 
 {
-  if [[ "$(sudo zfs list -t snapshot | grep $MACHINE_CONTAINER@snapshot-$1 2> /dev/null)" == "" ]]; then
-    lxc exec $MACHINE_CONTAINER -- su ubuntu -c "$2";
-    lxc snapshot $MACHINE_CONTAINER "$1";
+  if [[ "$(sudo zfs list -t snapshot | grep ${MACHINE_CONTAINER}@snapshot-$1 2> /dev/null)" == "" ]]; then
+    lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c "$2";
+    lxc snapshot ${MACHINE_CONTAINER} "$1";
   else
      msg "Skipping snapshot ($1)"
   fi
@@ -84,49 +90,49 @@ configure()
 
 build_container() 
 {
-  msg "Starting configuration ($MACHINE_CONTAINER)...";
-  if [[ "$(sudo zfs list -t snapshot | grep $MACHINE_CONTAINER@snapshot-zero 2> /dev/null)" == "" ]]; then
-    #lxc exec $MACHINE_CONTAINER -- bash -c 'echo "127.0.0.1	localhost" | tee -a /etc/hosts'
-    lxc exec $MACHINE_CONTAINER -- bash -c 'echo "127.0.1.1	$(hostname)" | tee -a /etc/hosts';
-    export PUBLIC_KEY_STRING=$(cat $HOME/.ssh/id_rsa.pub)
-    lxc exec $MACHINE_CONTAINER -- su ubuntu -c "mkdir -p /home/ubuntu/.ssh && echo $PUBLIC_KEY_STRING | tee /home/ubuntu/.ssh/authorized_keys"
-    lxc exec $MACHINE_CONTAINER -- su ubuntu -c 'echo "export HOSTNAME_PREFIX=cuda" | tee -a /home/ubuntu/.bashrc';
-    lxc exec $MACHINE_CONTAINER -- su ubuntu -c "echo 'export VERSION=$CUDA_VERSION' | tee -a /home/ubuntu/.bashrc";
-    lxc exec $MACHINE_CONTAINER -- su ubuntu -c 'echo "export DISPLAY=:0" | tee -a $HOME/.bashrc';
-    lxc exec $MACHINE_CONTAINER -- bash -c 'echo export JUPYTER_IP="\$(ip route get 8.8.8.8 | head -1 | cut -d\" \" -f8)" | tee -a /home/ubuntu/.bashrc';
+  msg "Starting configuration (${MACHINE_CONTAINER})...";
+  if [[ "$(sudo zfs list -t snapshot | grep ${MACHINE_CONTAINER}@snapshot-zero 2> /dev/null)" == "" ]]; then
+    #lxc exec ${MACHINE_CONTAINER} -- bash -c 'echo "127.0.0.1	localhost" | tee -a /etc/hosts'
+    lxc exec ${MACHINE_CONTAINER} -- bash -c 'echo "127.0.1.1	$(hostname)" | tee -a /etc/hosts';
+    #export PUBLIC_KEY_STRING=$(cat ${HOME}/.ssh/id_rsa.pub)
+    #lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c "mkdir -p /home/ubuntu/.ssh && echo ${PUBLIC_KEY_STRING} | tee /home/ubuntu/.ssh/authorized_keys"
+    lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c 'echo "export HOSTNAME_PREFIX=cuda" | tee -a /home/ubuntu/.bashrc';
+    lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c "echo 'export VERSION=${CUDA_VERSION}' | tee -a /home/ubuntu/.bashrc";
+    lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c 'echo "export DISPLAY=:0" | tee -a ${HOME}/.bashrc';
+    lxc exec ${MACHINE_CONTAINER} -- bash -c 'echo export JUPYTER_IP="\$(ip route get 8.8.8.8 | head -1 | cut -d\" \" -f8)" | tee -a /home/ubuntu/.bashrc';
 
-    msg "Configure the password for user 'ubuntu' on container ($MACHINE_CONTAINER).";
-    lxc exec $MACHINE_CONTAINER -- bash -c 'passwd ubuntu';
-    #lxc exec $MACHINE_CONTAINER -- bash -c 'nvidia-smi';
-    lxc snapshot $MACHINE_CONTAINER zero
+    msg "Configure the password for user 'ubuntu' on container (${MACHINE_CONTAINER}).";
+    lxc exec ${MACHINE_CONTAINER} -- bash -c 'passwd ubuntu';
+    #lxc exec ${MACHINE_CONTAINER} -- bash -c 'nvidia-smi';
+    lxc snapshot ${MACHINE_CONTAINER} zero
   else
     msg "Skipping..."
   fi
   
   configure "base" "/scripts/base"
   configure "nodejs" "/scripts/nodejs no"
-  configure "cuda" "/scripts/cuda $CUDA_VERSION $LOCAL_REPOSITORY $NVIDIA_PLATFORM" # /scripts/cuda 10.0 yes ubuntu1604
-  if [[ $INSTALL_NVIDIA_DRIVER == 'yes' ]];then
+  configure "cuda" "/scripts/cuda ${CUDA_VERSION} ${LOCAL_REPOSITORY} ${NVIDIA_PLATFORM}" # /scripts/cuda 10.0 yes ubuntu1604
+  if [[ ${INSTALL_NVIDIA_DRIVER} == 'yes' ]];then
     configure "cuda_extra" "/scripts/cuda_extra"
   fi
-  configure "python3" "/scripts/python3 $PYTHON_VERSION"
-  configure "jupyterlab" "/scripts/jupyterlab $PYTHON_VERSION"
-  #configure "jupyterlab_extra" "/scripts/jupyterlab_extra $PYTHON_VERSION"
+  configure "python3" "/scripts/python3 ${PYTHON_VERSION}"
+  configure "jupyterlab" "/scripts/jupyterlab ${PYTHON_VERSION}"
+  #configure "jupyterlab_extra" "/scripts/jupyterlab_extra ${PYTHON_VERSION}"
 
-  if [[ $JAVASCRIPT_KERNEL == 'yes' ]];then
-    configure "javascript" "/scripts/javascript $PYTHON_VERSION"
+  if [[ ${JAVASCRIPT_KERNEL} == 'yes' ]];then
+    configure "javascript" "/scripts/javascript ${PYTHON_VERSION}"
   fi
   
-  if [[ $R_KERNEL == 'yes' ]];then
-    configure "r" "/scripts/r $PYTHON_VERSION"
+  if [[ ${R_KERNEL} == 'yes' ]];then
+    configure "r" "/scripts/r ${PYTHON_VERSION}"
   fi
 
-  if [[ $JULIA_KERNEL == 'yes' ]];then
-    configure "julia" "/scripts/julia $PYTHON_VERSION"
+  if [[ ${JULIA_KERNEL} == 'yes' ]];then
+    configure "julia" "/scripts/julia ${PYTHON_VERSION}"
   fi
 
-  if [[ $OCTAVE_KERNEL == 'yes' ]];then
-    configure "octave" "/scripts/octave $PYTHON_VERSION"
+  if [[ ${OCTAVE_KERNEL} == 'yes' ]];then
+    configure "octave" "/scripts/octave ${PYTHON_VERSION}"
   fi
 
   configure "cloud9" "/scripts/cloud9"
@@ -136,22 +142,22 @@ post_build()
 {
     #msg "Setting external GUI Infrastruture"
     #if [[ "$(sudo zfs list -t snapshot | grep $MACHINE_CONTAINER@snapshot-zero 2> /dev/null)" == "" ]]; then
-    lxc config device add $MACHINE_CONTAINER X0          disk source=/tmp/.X11-unix/X0  path=/tmp/.X11-unix/X0
-    lxc config device add $MACHINE_CONTAINER Xauthority  disk source=${XAUTHORITY}      path=/home/ubuntu/.Xauthority
+    lxc config device add ${MACHINE_CONTAINER} X0          disk source=/tmp/.X11-unix/X0  path=/tmp/.X11-unix/X0
+    lxc config device add ${MACHINE_CONTAINER} Xauthority  disk source=${XAUTHORITY}      path=/home/ubuntu/.Xauthority
     #fi
 }
 
 process()
 {
     #If container evet get online once it must have this snapshot
-    if [[ "$(sudo zfs list -t snapshot | grep $MACHINE_CONTAINER@snapshot-zero 2> /dev/null)" == "" ]]; then
+    if [[ "$(sudo zfs list -t snapshot | grep ${MACHINE_CONTAINER}@snapshot-zero 2> /dev/null)" == "" ]]; then
         launch;
     fi
 
     build_container;
     #post_build;
 
-    msg "Container ($MACHINE_CONTAINER) is ready to be used.";
+    msg "Container (${MACHINE_CONTAINER}) is ready to be used.";
     msg "If nothing was done, then the container already exists";
 }
 
@@ -169,91 +175,76 @@ if [[ "$#" -gt 0 ]]; then
   
 else
 
-  echo "Cotainers until now:"
-  lxc ls;
+  echo "Cotainers Names already taken:"
+  lxc ls --format csv -c n;
   echo ""
-  echo "What the name of container to use? [default=$MACHINE_CONTAINER]:"
+  echo "Type the New Container Name [default=${MACHINE_CONTAINER}]:"
   read _NAME_
-  if [[ "$_NAME_" != "" ]];then
-    MACHINE_CONTAINER=$_NAME_
+  if [[ "${_NAME_}" != "" ]];then
+    MACHINE_CONTAINER=${_NAME_}
   fi
-  #msg "Container name: [$MACHINE_CONTAINER]"
   
-  #echo ""
-  echo "Need GPU acceleration? (yes/no) [default=$USE_GPU]:"
-  #echo "If typed incorrectly the default will be used"
+  echo "Need GPU acceleration (yes/no) [default=${USE_GPU}]:"
   read _GPU_ACCELERATION_
-  if [[ "$_GPU_ACCELERATION_" == 'no' ]];then
-    USE_GPU=$_GPU_ACCELERATION_
+  if [[ "${_GPU_ACCELERATION_}" == 'no' ]];then
+    USE_GPU=${_GPU_ACCELERATION_}
   fi
-  #msg "Using GPU acceleration: [$USE_GPU]"
 
-  #echo ""
-  echo "Install Nvidia Driver on Container ? [dafault=$INSTALL_NVIDIA_DRIVER]" 
-  #echo "If typed incorrectly the default will be used"
+  echo "Install Nvidia Driver ? [dafault=${INSTALL_NVIDIA_DRIVER}]" 
+  echo "(only install if needs OpenGL drivers)"
   read _INSTALL_DRIVER_
-  if [[ "$_INSTALL_DRIVER_" == 'yes' ]];then
-    INSTALL_NVIDIA_DRIVER=$_INSTALL_DRIVER_
+  if [[ "${_INSTALL_DRIVER_}" == 'yes' ]];then
+    INSTALL_NVIDIA_DRIVER=${_INSTALL_DRIVER_}
   fi
-  #msg "Install Nvidia Driver: [$INSTALL_NVIDIA_DRIVER]"
 
-  #echo ""
-  echo "What desired CUDA version? (8.0, 9.0, 9.1, 9.2, 10.0) [default=$CUDA_VERSION]:"
-  #echo "If typed incorrectly the default will be used"
+  echo "Which CUDA version (8.0, 9.0, 9.1, 9.2, 10.0) [default=${CUDA_VERSION}]:"
   read _VERSION_
-  if [[ $_VERSION_ == "8.0" || $_VERSION_ == "9.0" || $_VERSION_ == "9.1" || $_VERSION_ == "9.2" || $_VERSION_ == "10.0" ]];then
-    CUDA_VERSION=$_VERSION_
+  if [[ ${_VERSION_} == "8.0" || ${_VERSION_} == "9.0" || ${_VERSION_} == "9.1" || ${_VERSION_} == "9.2" || ${_VERSION_} == "10.0" ]];then
+    CUDA_VERSION=${_VERSION_}
   fi
-  #msg "Cuda version: [$CUDA_VERSION]"
   
-  #echo ""
-  echo "Use LOCAL MIRROR repository for NVIDIA CUDA? (yes/no) [default=$LOCAL_REPOSITORY]"
+  echo "Use NVIDIA Local Repository Mirror (yes/no) [default=${LOCAL_REPOSITORY}]"
   read _LOCAL_
-  if [[ $_LOCAL_ == 'no' ]]; then
-    LOCAL_REPOSITORY=$_LOCAL_
+  if [[ ${_LOCAL_} == 'no' ]]; then
+    LOCAL_REPOSITORY=${_LOCAL_}
   fi
-  #msg "Using Local Repository: [$LOCAL_REPOSITORY]"
 
-  #echo ""
-  echo "Type the Linux version platform [default=$MACHINE_BASE]"
-  #echo "If you don't know use this in another terminal: "
-  #echo "lxc image list [<remote>:]"
+  echo "Which Container Image [default=${MACHINE_BASE}]"
+  echo "Can be used an image published based in ${MACHINE_BASE}:"
   read _PLATFORM_
-  if [[ "$_PLATFORM_" != "" ]];then
-    MACHINE_BASE=$_PLATFORM_
+  if [[ "${_PLATFORM_}" != "" ]];then
+    MACHINE_BASE=${_PLATFORM_}
   fi
-  #msg "platform to use: [$MACHINE_BASE]"
 
-  #echo ""
-  echo "Type the python version [default=$PYTHON_VERSION]"
+  echo "Which Python version [default=${PYTHON_VERSION}]"
+  echo "Pyenv will install it inside the container"
   read _PYTHON_VERSION_
-  if [[ "$_PYTHON_VERSION_" != "" ]];then
-    PYTHON_VERSION=$_PYTHON_VERSION_
+  if [[ "${_PYTHON_VERSION_}" != "" ]];then
+    PYTHON_VERSION=${_PYTHON_VERSION_}
   fi
-  #msg "Python version to use: [$PYTHON_VERSION]"
 
-  echo "Install Javascript Kernel [default=$JAVASCRIT_KERNEL]"
+  echo "Install Javascript Kernel [default=${JAVASCRIT_KERNEL}]"
   read _JAVASCRIPT_KERNEL_
-  if [[ "$_JAVASCRIPT_KERNEL_" != "" ]];then
-    JAVASCRIT_KERNEL=$_JAVASCRIPT_KERNEL_
+  if [[ "${_JAVASCRIPT_KERNEL_}" != "" ]];then
+    JAVASCRIT_KERNEL=${_JAVASCRIPT_KERNEL_}
   fi
 
-  echo "Install R Kernel [default=$R_KERNEL]"
+  echo "Install R Kernel [default=${R_KERNEL}]"
   read _R_KERNEL_
-  if [[ "$_R_KERNEL_" != "" ]];then
-    R_KERNEL=$_R_KERNEL_
+  if [[ "${_R_KERNEL_}" != "" ]];then
+    R_KERNEL=${_R_KERNEL_}
   fi
 
-  echo "Install Julia Kernel [default=$JULIA_KERNEL]"
+  echo "Install Julia Kernel [default=${JULIA_KERNEL}]"
   read _JULIA_KERNEL_
-  if [[ "$_JULIA_KERNEL_" != "" ]];then
-    JULIA_KERNEL=$_JULIA_KERNEL_
+  if [[ "${_JULIA_KERNEL_}" != "" ]];then
+    JULIA_KERNEL=${_JULIA_KERNEL_}
   fi
 
-  echo "Install Octave Kernel [default=$OCTAVE_KERNEL]"
+  echo "Install Octave Kernel [default=${OCTAVE_KERNEL}]"
   read _OCTAVE_KERNEL_
-  if [[ "$_OCTAVE_KERNEL_" != "" ]];then
-    OCTAVE_KERNEL=$_OCTAVE_KERNEL_
+  if [[ "${_OCTAVE_KERNEL_}" != "" ]];then
+    OCTAVE_KERNEL=${_OCTAVE_KERNEL_}
   fi
 
   process;

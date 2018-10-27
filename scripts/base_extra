@@ -38,8 +38,6 @@ sudo apt install -yq gcc-6 gcc-7 gcc-8 g++-6 g++-7 g++-8
 sudo ln -s -f /usr/bin/gcc-7 /usr/bin/gcc
 sudo ln -s -f /usr/bin/g++-7 /usr/bin/g++
 
-
-
 # ============================================================================
 
 sudo apt update -qq
@@ -57,7 +55,11 @@ cd ompi
 ./configure --enable-mpi-thread-multiple --prefix=/opt/openmpi-4.1.0 --with-cuda=/usr/local/cuda/ --with-cuda-libdir=/usr/local/cuda/lib64
 make -j8 all
 sudo make -j8 install
+
+export PATH=/opt/openmpi-4.1.0/bin:$PATH
 echo 'export PATH=/opt/openmpi-4.1.0/bin:$PATH' | tee -a $HOME/.bashrc
+
+export LD_LIBRARY_PATH=/opt/openmpi-4.1.0/lib:$LD_LIBRARY_PATH
 echo 'export LD_LIBRARY_PATH=/opt/openmpi-4.1.0/lib:$LD_LIBRARY_PATH' | tee -a $HOME/.bashrc
 #verify
 mpirun --version
@@ -65,11 +67,17 @@ mpirun --version
 ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
 #mca:mpi:base:param:mpi_built_with_cuda_support:value:true
 
-
-
 # ============================================================================
+echo "   ___       _     _           _ _ _  ";
+echo "  / _ \_   _| |__ (_)_ __   __| / / | ";
+echo " / /_)/ | | | '_ \| | '_ \ / _\` | | | ";
+echo "/ ___/| |_| | |_) | | | | | (_| | | | ";
+echo "\/     \__, |_.__/|_|_| |_|\__,_|_|_| ";
+echo "       |___/                          ";
 
 msg "Building PyBind"
+sudo apt update -qq
+sudo apt isntall libboost-all-dev -y
 #[pybind11]
 cd $HOME
 git clone https://github.com/pybind/pybind11.git
@@ -77,15 +85,23 @@ mkdir -p pybind11/build && cd pybind11/build
 cmake .. 
 make -j8
 sudo make install
-echo "export pybind11_DIR=/usr/local/share/cmake/pybind11" | tee -a $HOME/.bashrc
-echo "export pybind11_INCLUDE_DIR=/usr/local/include/pybind11" | tee -a $HOME/.bashrc
 
 export pybind11_DIR=/usr/local/share/cmake/pybind11
-#/home/ubuntu/pybind11/pybind11
+echo "export pybind11_DIR=/usr/local/share/cmake/pybind11" | tee -a $HOME/.bashrc
+
 export pybind11_INCLUDE_DIR=/usr/local/include/pybind11
+echo "export pybind11_INCLUDE_DIR=/usr/local/include/pybind11" | tee -a $HOME/.bashrc
+
+#/home/ubuntu/pybind11/pybind11
 #/home/ubuntu/pybind11/include
 
 # ============================================================================
+echo "  _____       _       _     ___           _                          ";
+echo "  \_   \_ __ | |_ ___| |   / _ \__ _  ___| | ____ _  __ _  ___  ___  ";
+echo "   / /\/ '_ \| __/ _ \ |  / /_)/ _\` |/ __| |/ / _\` |/ _\` |/ _ \/ __| ";
+echo "/\/ /_ | | | | ||  __/ | / ___/ (_| | (__|   < (_| | (_| |  __/\__ \ ";
+echo "\____/ |_| |_|\__\___|_| \/    \__,_|\___|_|\_\__,_|\__, |\___||___/ ";
+echo "                                                    |___/            ";
 
 msg "Installing Intel Performance Libraries:"
 cd $HOME
@@ -95,18 +111,17 @@ msg "Installing MKL - Intel Math Kernel Library"
 # [MKL]
 tar -xf /utils/intel/l_mkl_2019.0.117.tgz -C $HOME/intel_installers
 cd $HOME/intel_installers/l_mkl_2019.0.117
-if [[ -d "/utils/intel/mkl-silent.cfg" ]];then
+if [[ -e "/utils/intel/mkl-silent.cfg" ]];then
   sudo ./install.sh  --silent /utils/intel/mkl-silent.cfg
 else
   sudo ./install.sh  --duplicate /utils/intel/mkl-silent.cfg
 fi
 
-
 msg "Installing MPI - Intel MPI Library"
 # [MPI]
 tar -xf /utils/intel/l_mpi_2019.0.117.tgz -C $HOME/intel_installers/
 cd $HOME/intel_installers/l_mpi_2019.0.117
-if [[ -d "/utils/intel/mpi-silent.cfg" ]];then
+if [[ -e "/utils/intel/mpi-silent.cfg" ]];then
   sudo ./install.sh  --silent /utils/intel/mpi-silent.cfg
 else
   sudo ./install.sh  --duplicate /utils/intel/mpi-silent.cfg
@@ -115,8 +130,8 @@ fi
 msg "Installing TBB - Intel Threading Building BLocks Library"
 # [TBB]
 tar -xf /utils/intel/l_tbb_2019.0.117.tgz -C $HOME/intel_installers
-cd $HOME/intel_installers/l_mpi_2019.0.117
-if [[ -d "/utils/intel/tbb-silent.cfg" ]];then
+cd $HOME/intel_installers/l_tbb_2019.0.117
+if [[ -e "/utils/intel/tbb-silent.cfg" ]];then
   sudo ./install.sh  --silent /utils/intel/tbb-silent.cfg
 else
   sudo ./install.sh  --duplicate /utils/intel/tbb-silent.cfg
@@ -126,21 +141,30 @@ msg "Installing IPP - Intel Integrated Performance Primitives"
 # [IPP]
 tar -xf /utils/intel/l_ipp_2019.0.117.tgz -C $HOME/intel_installers/
 cd $HOME/intel_installers/l_ipp_2019.0.117
-if [[ -d "/utils/intel/ipp-silent.cfg" ]];then
+if [[ -e "/utils/intel/ipp-silent.cfg" ]];then
   sudo ./install.sh  --silent /utils/intel/ipp-silent.cfg
 else
   sudo ./install.sh  --duplicate /utils/intel/ipp-silent.cfg
 fi
 
-msg "Installing DAAL - Intel Data Analytics Acceleration Library"
-# [DAAL]
-tar -xf /utils/intel/l_daal_2019.0.117.tgz -C $HOME/intel_installers/
-cd $HOME/intel_installers/l_daal_2019.0.117
-if [[ -d "/utils/intel/daal-silent.cfg" ]];then
-  sudo ./install.sh  --silent /utils/intel/daal-silent.cfg
-else
-  sudo ./install.sh  --duplicate /utils/intel/daal-silent.cfg
-fi
+#msg "Installing DAAL - Intel Data Analytics Acceleration Library"
+## [DAAL]
+#tar -xf /utils/intel/l_daal_2019.0.117.tgz -C $HOME/intel_installers/
+#cd $HOME/intel_installers/l_daal_2019.0.117
+#if [[ -e "/utils/intel/daal-silent.cfg" ]];then
+#  sudo ./install.sh  --silent /utils/intel/daal-silent.cfg
+#else
+#  sudo ./install.sh  --duplicate /utils/intel/daal-silent.cfg
+#fi
+
+export MKLROOT=/opt/intel/mkl
+export MKL_ROOT=$MKLROOT
+export MKL_INCLUDE=$MKL_ROOT/include
+export MKL_LIBRARY=$MKL_ROOT/lib/intel64
+source /opt/intel/mkl/bin/mklvars.sh intel64
+source /opt/intel/bin/compilervars.sh intel64
+export CMAKE_INCLUDE_PATH=$MKL_INCLUDE:$CMAKE_INCLUDE_PATH
+export CMAKE_LIBRARY_PATH=$MKL_LIBRARY:$CMAKE_LIBRARY_PATH
 
 echo 'export MKLROOT=/opt/intel/mkl' | tee -a $HOME/.bashrc
 echo 'export MKL_ROOT=$MKLROOT' | tee -a $HOME/.bashrc
@@ -153,11 +177,18 @@ echo 'export CMAKE_LIBRARY_PATH=$MKL_LIBRARY:$CMAKE_LIBRARY_PATH' | tee -a $HOME
 
 # ============================================================================
 
+echo "           _      ___           _    ";
+echo "  /\/\    /_\    / _ \ /\/\    /_\   ";
+echo " /    \  //_\\  / /_\//    \  //_\\  ";
+echo "/ /\/\ \/  _  \/ /_\\/ /\/\ \/  _  \ ";
+echo "\/    \/\_/ \_/\____/\/    \/\_/ \_/ ";
+echo "                                     ";
+
 
 #sudo apt install liblapack-dev libblas-dev 
 #sudo apt remove -y libblas-common libblas-dev libblas3 liblapack-dev liblapack3
 
-sudo apt install libopenblas-dev
+sudo apt install -y libopenblas-dev
 #sudo apt remove -y libblas-common libblas-dev libblas3 libopenblas-base libopenblas-dev
 
 sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
@@ -178,8 +209,8 @@ GPU_TARGET=sm_30
 #NV_COMP= -gencode arch=compute_30,code=compute_30
 EOF
 make -j12 all
+#sudo make install prefix=/opt/magma
 sudo make install prefix=/usr
-#prefix=/opt/magma
 sudo ldconfig
 
 
@@ -192,7 +223,9 @@ cd $HOME
 git clone --recurse https://github.com/intel/mkl-dnn.git
 #cd $HOME/mkl-dnn/scripts && ./prepare_mkl.sh
 mkdir $HOME/mkl-dnn/build -p && cd $HOME/mkl-dnn/build
-cmake -DCMAKE_INSTALL_PREFIX=/opt/mkl-dnn \
+
+#cmake -DCMAKE_INSTALL_PREFIX=/opt/mkl-dnn \
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
       -DMKLDNN_LIBRARY_TYPE=SHARED \
       -DMKLDNN_THREADING=OMP:COMP \
       .. 

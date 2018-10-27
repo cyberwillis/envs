@@ -20,16 +20,16 @@ msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
 
-cd $HOME
-source $HOME/.bashrc
+cd ${HOME}
+source ${HOME}/.bashrc
 
 if [[ "$#" -gt 0 ]];then
   PYTHON_VERSION="$1"
-  export PYENV_ROOT=$HOME/.pyenv
-  export PATH=$PYENV_ROOT/bin:$PATH
+  export PYENV_ROOT=${HOME}/.pyenv
+  export PATH=${PYENV_ROOT}/bin:${PATH}
   eval "$(pyenv init -)"
-  pyenv local $PYTHON_VERSION
-  export PATH=$HOME/.local/bin:$PATH
+  pyenv local ${PYTHON_VERSION}
+  export PATH=${HOME}/.local/bin:${PATH}
 
 fi
 
@@ -50,31 +50,3 @@ jupyter labextension install @jupyterlab/plotly-extension
 
 msg "Enabling Bokeh"
 jupyter labextension install jupyterlab_bokeh
-
-msg "Jupyter Notebook as Service"
-cd $HOME
-cat <<EOF | sudo tee /lib/systemd/system/jupyter.service
-# After Ubuntu 16.04, Systemd becomes the default. 
-# It is simpler than https://gist.github.com/Doowon/38910829898a6624ce4ed554f082c4dd
-
-[Unit]
-Description=Jupyter Notebook
-
-[Service]
-Type=simple
-PIDFile=/run/jupyter.pid
-ExecStart=/bin/bash -c "/home/ubuntu/.local/bin/jupyter notebook --port=$JUPYTER_PORT --ip=$JUPYTER_IP --no-browser --NotebookApp.password=$JUPYTER_SECRET  --NotebookApp.notebook_dir=/projects --allow-root --config=/home/ubuntu/.jupyter/jupyter_notebook_config.py"
-User=ubuntu
-Group=ubuntu
-WorkingDirectory=/home/ubuntu/
-Restart=always
-RestartSec=10
-#KillMode=mixed
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl enable jupyter.service
-sudo systemctl daemon-reload
-sudo systemctl restart jupyter.service

@@ -16,29 +16,29 @@ msg() {
 if [[ "$#" -gt 0 ]];then
   PYTHON_VERSION="$1"
 
-  export PYENV_ROOT=$HOME/.pyenv
-  export PATH=$PYENV_ROOT/bin:$PATH
+  export PYENV_ROOT=${HOME}/.pyenv
+  export PATH=${PYENV_ROOT}/bin:${PATH}
 
-  pyenv local $PYTHON_VERSION
+  pyenv local ${PYTHON_VERSION}
 
-  export PATH=$HOME/.local/bin:$PATH
-  export PYTHONPATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
-  #export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+  export PATH=${HOME}/.local/bin:${PATH}
+  export PYTHONPATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
+  #export PYTHONPATH=${HOME}/.local/lib/python3.6/site-packages
 
   export PYTHON_BIN_PATH=/home/ubuntu/.pyenv/shims/python
   #export PYTHON_BIN_PATH=/usr/bin/python3
 
-  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/$PYTHON_VERSION/lib/python3.6/site-packages
-  #export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
+  #export PYTHON_LIB_PATH=${HOME}/.local/lib/python3.6/site-packages
 
   #msg "Installing Pre-requisites for docs"
   #sudo apt-get -qy install pandoc texlive-xetex
 fi
 
-#export PATH=$HOME/.local/bin:$PATH
-#export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+#export PATH=${HOME}/.local/bin:$PATH
+#export PYTHONPATH=${HOME}/.local/lib/python3.6/site-packages
 #export PYTHON_BIN_PATH=/usr/bin/python3
-#export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+#export PYTHON_LIB_PATH=${HOME}/.local/lib/python3.6/site-packages
 
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo touch /etc/apt/sources.list.d/cran.list
@@ -46,25 +46,25 @@ echo 'deb https://cloud.r-project.org/bin/linux/ubuntu xenial/' | sudo tee -a /e
 echo 'deb http://archive.ubuntu.com/ubuntu bionic-backports main restricted universe' | sudo tee -a /etc/apt/sources.list.d/cran.list
 
 msg "Installing R"
-sudo apt update
-sudo apt install -yq --no-install-recommends \
-                          r-base
+sudo apt update  -qq
+sudo apt install -qqy --no-install-recommends \
+                  r-base
 #apt-get install r-base-dev -y
 
 msg "Installing packages for IRKernel"
-sudo apt install -yq --no-install-recommends \
-                         libssl-dev \
-                         libxml2-dev \
-                         libcurl4-openssl-dev \
-                         libssh2-1-dev \
-                         libcairo-dev \
-                         libxt-dev
+sudo apt install -qqy --no-install-recommends \
+                  libssl-dev \
+                  libxml2-dev \
+                  libcurl4-openssl-dev \
+                  libssh2-1-dev \
+                  libcairo-dev \
+                  libxt-dev
 
-mkdir $HOME/.local/lib/R/site-library -p
+mkdir ${HOME}/.local/lib/R/site-library -p
 
-export R_LIBS_USER="$HOME/.local/lib/R/site-library"
+export R_LIBS_USER="${HOME}/.local/lib/R/site-library"
 
-echo 'export R_LIBS_USER="$HOME/.local/lib/R/site-library"' | tee -a $HOME/.bashrc
+echo 'export R_LIBS_USER="${HOME}/.local/lib/R/site-library"' | tee -a ${HOME}/.bashrc
 R -e ".libPaths()"
 sudo R -e "install.packages(c('repr', 'IRdisplay', 'evaluate', 'crayon', 'pbdZMQ', 'devtools', 'uuid', 'digest'), dependencies = TRUE)"
 

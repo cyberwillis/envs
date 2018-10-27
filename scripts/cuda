@@ -1,10 +1,9 @@
 #!/bin/bash -e
 
-#Execute with from outsite LXC
+# Execute with from outsite LXC
 # lxc exec controller -- bash -c "/projects/_lxc/cuda.sh"
 
-# DOCUMENTATION:
-
+# [DOCUMENTATION]
 # https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html
 # CUDA Toolkit	              Linux x86_64 Driver Version  Windows x86_64 Driver Version
 # CUDA 10.0.130               >= 410.48                    >= 411.31
@@ -18,43 +17,54 @@
 # CUDA 7.0 (7.0.28)	          >= 346.46                    >= 347.62
 
 # http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#package-manager-metas
-# [CUDA 8.0 META PACKAGES]
-# cuda	                 Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
-# cuda-8-0               Installs all CUDA Toolkit and Driver packages. Remains at version 8.0 until an additional version of CUDA is installed.
-# cuda-toolkit-8-0       Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
-# cuda-runtime-8-0       Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
-# cuda-drivers	         Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
-
-# [CUDA 9.0 META PACKAGES]
-# cuda	                 Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
-# cuda-9-0               Installs all CUDA Toolkit and Driver packages. Remains at version 9.0 until an additional version of CUDA is installed.
-# cuda-toolkit-9-0       Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
-# cuda-runtime-9-0       Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
-# cuda-libraries-9-0     Installs all runtime CUDA Library packages.
-# cuda-libraries-dev-9-0 Installs all development CUDA Library packages.
-# cuda-drivers	         Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
-
-# [CUDA 9.1 META PACKAGES]
-# cuda	                 Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
-# cuda-9-1               Installs all CUDA Toolkit and Driver packages. Remains at version 9.1 until an additional version of CUDA is installed.
-# cuda-toolkit-9-1       Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
-# cuda-tools-9-1         Installs all CUDA command line and visual tools.
-# cuda-runtime-9-1       Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
-# cuda-compiler-9-1      Installs all CUDA compiler packages.
-# cuda-libraries-9-1     Installs all runtime CUDA Library packages.
-# cuda-libraries-dev-9-1 Installs all development CUDA Library packages.
-# cuda-drivers	         Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
+# [CUDA 10.0 META PACKAGES]
+# cuda	                  Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
+# cuda-10-0	              Installs all CUDA Toolkit and Driver packages. Remains at version 10.0 until an additional version of CUDA is installed.
+# cuda-toolkit-10-0	      Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
+# cuda-tools-10-0	        Installs all CUDA command line and visual tools.
+# cuda-runtime-10-0	      Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
+# cuda-compiler-10-0	    Installs all CUDA compiler packages.
+# cuda-libraries-10-0	    Installs all runtime CUDA Library packages.
+# cuda-libraries-dev-10-0	Installs all development CUDA Library packages.
+# cuda-drivers	          Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
 
 # [CUDA 9.2 META PACKAGES]
-#cuda	                   Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
-#cuda-9-2	               Installs all CUDA Toolkit and Driver packages. Remains at version 9.2 until an additional version of CUDA is installed.
-#cuda-toolkit-9-2	       Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
-#cuda-tools-9-2	         Installs all CUDA command line and visual tools.
-#cuda-runtime-9-2	       Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
-#cuda-compiler-9-2	     Installs all CUDA compiler packages.
-#cuda-libraries-9-2	     Installs all runtime CUDA Library packages.
-#cuda-libraries-dev-9-2	 Installs all development CUDA Library packages.
-#cuda-drivers	           Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
+# cuda	                  Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
+# cuda-9-2	              Installs all CUDA Toolkit and Driver packages. Remains at version 9.2 until an additional version of CUDA is installed.
+# cuda-toolkit-9-2	      Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
+# cuda-tools-9-2	        Installs all CUDA command line and visual tools.
+# cuda-runtime-9-2	      Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
+# cuda-compiler-9-2	      Installs all CUDA compiler packages.
+# cuda-libraries-9-2	    Installs all runtime CUDA Library packages.
+# cuda-libraries-dev-9-2	Installs all development CUDA Library packages.
+# cuda-drivers	          Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
+
+# [CUDA 9.1 META PACKAGES]
+# cuda	                  Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
+# cuda-9-1                Installs all CUDA Toolkit and Driver packages. Remains at version 9.1 until an additional version of CUDA is installed.
+# cuda-toolkit-9-1        Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
+# cuda-tools-9-1          Installs all CUDA command line and visual tools.
+# cuda-runtime-9-1        Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
+# cuda-compiler-9-1       Installs all CUDA compiler packages.
+# cuda-libraries-9-1      Installs all runtime CUDA Library packages.
+# cuda-libraries-dev-9-1  Installs all development CUDA Library packages.
+# cuda-drivers	          Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
+
+# [CUDA 9.0 META PACKAGES]
+# cuda	                  Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
+# cuda-9-0                Installs all CUDA Toolkit and Driver packages. Remains at version 9.0 until an additional version of CUDA is installed.
+# cuda-toolkit-9-0        Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
+# cuda-runtime-9-0        Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
+# cuda-libraries-9-0      Installs all runtime CUDA Library packages.
+# cuda-libraries-dev-9-0  Installs all development CUDA Library packages.
+# cuda-drivers	          Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
+
+# [CUDA 8.0 META PACKAGES]
+# cuda	                  Installs all CUDA Toolkit and Driver packages. Handles upgrading to the next version of the cuda package when it's released.
+# cuda-8-0                Installs all CUDA Toolkit and Driver packages. Remains at version 8.0 until an additional version of CUDA is installed.
+# cuda-toolkit-8-0        Installs all CUDA Toolkit packages required to develop CUDA applications. Does not include the driver.
+# cuda-runtime-8-0        Installs all CUDA Toolkit packages required to run CUDA applications, as well as the Driver packages.
+# cuda-drivers	          Installs all Driver packages. Handles upgrading to the next version of the Driver packages when they're released.
 
 export VERSION=10.0
 export LOCAL_REPOSITORY='yes'
@@ -97,11 +107,11 @@ msg() {
 
 install_nginx() {
 
-  if [[ $LOCAL_REPOSITORY == 'yes' ]]; then
+  if [[ ${LOCAL_REPOSITORY} == 'yes' ]]; then
     
     msg "Installing Repository Server Host (NGINX)"
-    sudo apt update
-    sudo apt install nginx -yq --no-install-recommends
+    sudo apt update  -qq
+    sudo apt install -qqy --no-install-recommends nginx 
     cat <<EOF | sudo tee /etc/nginx/sites-available/nvidia
 server {
   listen 80 default_server;
@@ -136,81 +146,81 @@ register_remote_repository() {
   #Ubuntu 18.04
   #echo 'deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64 /' | sudo tee /etc/apt/sources.list.d/cuda-local.list
   #Ubuntu 16.04
-  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/$PLATFORM/x86_64/7fa2af80.pub
-  echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$PLATFORM/x86_64 /" | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
-  echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$PLATFORM/x86_64 /"             | sudo tee /etc/apt/sources.list.d/cuda-local.list
+  sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/${PLATFORM}/x86_64/7fa2af80.pub
+  echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/${PLATFORM}/x86_64 /" | sudo tee /etc/apt/sources.list.d/machine-learning-local.list
+  echo "deb http://developer.download.nvidia.com/compute/cuda/repos/${PLATFORM}/x86_64 /"             | sudo tee /etc/apt/sources.list.d/cuda-local.list
 
-  #if [[ $INSTALL_DRIVER == 'yes' ]];then
+  #if [[ ${INSTALL_DRIVER} == 'yes' ]];then
   #  install_driver;
   #fi
 }
 
 install_cuda_packages() {
-  if [[ $VERSION == "10.0" ]];then
+  if [[ ${VERSION} == "10.0" ]];then
 
-    msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
+    msg "Installing Cuda Toolkit ${VERSION}"
+    sudo apt install -qqy --allow-unauthenticated --no-install-recommends \
             cuda-compat-10-0=410.48-1 \
-            cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-documentation-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cupti-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            libnccl2=$NCCL_VERSION-2+cuda$CUDA_PKG_NCCL_VERSION \
-            libnccl-dev=$NCCL_VERSION-2+cuda$CUDA_PKG_NCCL_VERSION \
-            cuda-nvcc-$CUDA_VERSION 
+            cuda-visual-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-samples-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-documentation-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-toolkit-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvml-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvtx-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-minimal-build-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cupti-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-command-line-tools-$CUDA_VERSION=${CUDA_PKG_VERSION} \
+            libnccl2=${NCCL_VERSION}-2+cuda${CUDA_PKG_NCCL_VERSION} \
+            libnccl-dev=${NCCL_VERSION}-2+cuda${CUDA_PKG_NCCL_VERSION} \
+            cuda-nvcc-${CUDA_VERSION} 
             
-            #cuda-compat-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+            #cuda-compat-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            #cuda-${CUDA_VERSION}=${CUDA_PKG_VERSION}
 
-  elif [[ $VERSION == "9.2" ]];then
+  elif [[ ${VERSION} == "9.2" ]];then
     
-    msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-            cuda-visual-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-samples-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-documentation-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cupti-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            libnccl2=$NCCL_VERSION-2+cuda$CUDA_PKG_NCCL_VERSION \
-            libnccl-dev=$NCCL_VERSION-2+cuda$CUDA_PKG_NCCL_VERSION \
-            cuda-nvcc-$CUDA_VERSION 
+    msg "Installing Cuda Toolkit ${VERSION}"
+    sudo apt install -qqy --allow-unauthenticated --no-install-recommends \
+            cuda-visual-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-samples-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-documentation-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-toolkit-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvml-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvtx-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-minimal-build-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cupti-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-command-line-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            libnccl2=${NCCL_VERSION}-2+cuda${CUDA_PKG_NCCL_VERSION} \
+            libnccl-dev=${NCCL_VERSION}-2+cuda${CUDA_PKG_NCCL_VERSION} \
+            cuda-nvcc-${CUDA_VERSION} 
             
             #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
 
-  elif [[ $VERSION == "9.1" ]];then
+  elif [[ ${VERSION} == "9.1" ]];then
 
-    msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvtx-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-            cuda-nvcc-$CUDA_VERSION 
+    msg "Installing Cuda Toolkit ${VERSION}"
+    sudo apt install -qqy --allow-unauthenticated --no-install-recommends \
+            cuda-toolkit-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvml-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvtx-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-minimal-build-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-command-line-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            libnccl2=${NCCL_VERSION}-1+cuda${CUDA_PKG_NCCL_VERSION} \
+            libnccl-dev=${NCCL_VERSION}-1+cuda${CUDA_PKG_NCCL_VERSION} \
+            cuda-nvcc-${CUDA_VERSION} 
             
             #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
 
@@ -218,58 +228,58 @@ install_cuda_packages() {
     #dpkg -i /var/nccl-repo-2.2.12-ga-cuda9.1/libnccl2_${NCCL_VERSION}'-1+cuda'${CUDA_PKG_NCCL_VERSION}_amd64.deb
     #dpkg -i /var/nccl-repo-2.2.12-ga-cuda9.1/libnccl-dev_${NCCL_VERSION}'-1+cuda'${CUDA_PKG_NCCL_VERSION}_amd64.deb
 
-  elif [[ $VERSION == "9.0" ]];then
+  elif [[ ${VERSION} == "9.0" ]];then
 
-    msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-libraries-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+    msg "Installing Cuda Toolkit ${VERSION}"
+    sudo apt install -qqy --allow-unauthenticated --no-install-recommends \
+            cuda-toolkit-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-libraries-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
             cuda-core-9-0=9.0.176.3-1 \
             cuda-cublas-9-0=9.0.176.4-1 \
             cuda-cublas-dev-9-0=9.0.176.4-1 \
-            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            libnccl2=$NCCL_VERSION-2+cuda$CUDA_PKG_NCCL_VERSION \
-            libnccl-dev=$NCCL_VERSION-2+cuda$CUDA_PKG_NCCL_VERSION 
+            cuda-nvml-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-minimal-build-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-command-line-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            libnccl2=${NCCL_VERSION}-2+cuda${CUDA_PKG_NCCL_VERSION} \
+            libnccl-dev=${NCCL_VERSION}-2+cuda${CUDA_PKG_NCCL_VERSION} 
             
-            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+            #cuda-$CUDA_VERSION=${CUDA_PKG_VERSION}
 
-  elif [[ $VERSION == "8.0" ]];then
+  elif [[ ${VERSION} == "8.0" ]];then
 
-    msg "Installing Cuda Toolkit $VERSION"
-    sudo apt install -yq --allow-unauthenticated --no-install-recommends \
-            cuda-toolkit-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvrtc-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvrtc-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvgraph-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvgraph-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cusolver-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cusolver-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
+    msg "Installing Cuda Toolkit ${VERSION}"
+    sudo apt install -qqy --allow-unauthenticated --no-install-recommends \
+            cuda-toolkit-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvrtc-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvrtc-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvgraph-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvgraph-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cusolver-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cusolver-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
             cuda-cublas-8-0=8.0.61.2-1 \
             cuda-cublas-dev-8-0=8.0.61.2-1 \
-            cuda-cufft-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cufft-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-curand-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-curand-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cusparse-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cusparse-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-npp-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-npp-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-cudart-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-core-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-misc-headers-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-command-line-tools-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-nvml-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-driver-dev-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            cuda-minimal-build-$CUDA_VERSION=$CUDA_PKG_VERSION \
-            libnccl2=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION \
-            libnccl-dev=$NCCL_VERSION-1+cuda$CUDA_PKG_NCCL_VERSION 
+            cuda-cufft-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cufft-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-curand-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-curand-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cusparse-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cusparse-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-npp-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-npp-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-cudart-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-core-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-misc-headers-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-command-line-tools-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-nvml-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-driver-dev-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            cuda-minimal-build-${CUDA_VERSION}=${CUDA_PKG_VERSION} \
+            libnccl2=${NCCL_VERSION}-1+cuda${CUDA_PKG_NCCL_VERSION} \
+            libnccl-dev=${NCCL_VERSION}-1+cuda${CUDA_PKG_NCCL_VERSION} 
             
-            #cuda-$CUDA_VERSION=$CUDA_PKG_VERSION
+            #cuda-$CUDA_VERSION=${CUDA_PKG_VERSION}
 
     # Bazel may not find this file so I created a symlink
     # cd /usr/local/cuda-8.0/nvvm/libdevice
@@ -354,19 +364,19 @@ install_cuda_8_0() {
 
 install_cuda() {
 
-  if [[ $VERSION == "8.0" ]];
+  if [[ ${VERSION} == "8.0" ]];
   then
     install_cuda_8_0;
-  elif [[ $VERSION == "9.0" ]];
+  elif [[ ${VERSION} == "9.0" ]];
   then
     install_cuda_9_0;
-  elif [[ $VERSION == "9.1" ]];
+  elif [[ ${VERSION} == "9.1" ]];
   then
     install_cuda_9_1;
-  elif [[ $VERSION == "9.2" ]];
+  elif [[ ${VERSION} == "9.2" ]];
   then
     install_cuda_9_2;
-  elif [[ $VERSION == "10.0" ]];then
+  elif [[ ${VERSION} == "10.0" ]];then
     install_cuda_10_0;
   fi
 }
@@ -374,37 +384,37 @@ install_cuda() {
 register_libraries_path() {
 
   # PATH for CUDA
-  #LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
-  #LIBRARY_PATH /usr/local/cuda/lib64/stubs
+  # LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
+  # LIBRARY_PATH /usr/local/cuda/lib64/stubs
   export PATH=/usr/local/cuda/bin:${PATH}
   export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
   export LIBRARY_PATH=/usr/local/cuda/lib64/stubs
   export CUPIT_LIB_PATH=/usr/local/cuda/extras/CUPTI/lib64/
   export LD_LIBRARY_PATH=${CUPIT_LIB_PATH}:$LD_LIBRARY_PATH
   
-  echo 'export PATH=/usr/local/cuda/bin:${PATH}' | tee -a $HOME/.bashrc
-  echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' | tee -a $HOME/.bashrc
-  echo 'export LIBRARY_PATH=/usr/local/cuda/lib64/stubs' | tee -a $HOME/.bashrc
-  echo 'export CUPIT_LIB_PATH=/usr/local/cuda/extras/CUPTI/lib64/' | tee -a $HOME/.bashrc
-  echo 'export LD_LIBRARY_PATH=${CUPIT_LIB_PATH}:$LD_LIBRARY_PATH' | tee -a $HOME/.bashrc
-  #chown ubuntu:ubuntu $HOME/.bashrc
+  echo 'export PATH=/usr/local/cuda/bin:${PATH}' | tee -a ${HOME}/.bashrc
+  echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' | tee -a ${HOME}/.bashrc
+  echo 'export LIBRARY_PATH=/usr/local/cuda/lib64/stubs' | tee -a ${HOME}/.bashrc
+  echo 'export CUPIT_LIB_PATH=/usr/local/cuda/extras/CUPTI/lib64/' | tee -a ${HOME}/.bashrc
+  echo 'export LD_LIBRARY_PATH=${CUPIT_LIB_PATH}:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+  #chown ubuntu:ubuntu ${HOME}/.bashrc
 
 }
 
 install_cudnn7() {
 
-  if [[ $VERSION == "9.0" || $VERSION == "9.2" || $VERSION == "10.0" ]];then
-    #compatible with 9.0 and 10.0
+  if [[ ${VERSION} == "9.0" || ${VERSION} == "9.2" || ${VERSION} == "10.0" ]];then
+    # compatible with 9.0 and 10.0
     export CUDNN_PKG_VERSION=7.3.1.20
-  elif [[ $VERSION == "8.0" ]]; then
-    #compatible with 8.0 and 9.2
+  elif [[ ${VERSION} == "8.0" ]]; then
+    # compatible with 8.0 and 9.2
     export CUDNN_PKG_VERSION=7.2.1.38
-  elif [[ $VERSION == "9.1" ]]; then
-    #compatible with 9.1
+  elif [[ ${VERSION} == "9.1" ]]; then
+    # compatible with 9.1
     export CUDNN_PKG_VERSION=7.1.3.16
   fi
   
-    sudo apt install -yq --no-install-recommends \
+    sudo apt install -qqy --no-install-recommends \
                       libcudnn7=${CUDNN_PKG_VERSION}-1+cuda${VERSION} \
                       libcudnn7-dev=${CUDNN_PKG_VERSION}-1+cuda${VERSION}
 }
