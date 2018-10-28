@@ -31,12 +31,12 @@ install_pyenv() {
 
     export PYENV_ROOT=${HOME}/.pyenv
     export PATH=${PYENV_ROOT}/bin:$PATH
+    eval "$(pyenv init -)"
     
     echo "export PYENV_ROOT=${HOME}/.pyenv" | tee -a ${HOME}/.bashrc
     echo 'export PATH=$PYENV_ROOT/bin:$PATH' | tee -a ${HOME}/.bashrc
-
-    eval "$(pyenv init -)"
     echo 'eval "$(pyenv init -)"' | tee -a ${HOME}/.bashrc
+
     echo "export PYENV_VERSION=${PYTHON_VERSION}" |  tee -a ${HOME}/.bashrc
     echo "export PYTHONPATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages" | tee -a ${HOME}/.bashrc
     echo "export PYTHON_BIN_PATH=/home/ubuntu/.pyenv/shims/python" | tee -a ${HOME}/.bashrc
@@ -44,7 +44,7 @@ install_pyenv() {
 
     pyenv install ${PYTHON_VERSION}
     pyenv local ${PYTHON_VERSION}
-    pip install --user -U pip
+    pip install -U pip
 
     sudo apt remove -qqy python3-pip
 
