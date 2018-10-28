@@ -45,7 +45,8 @@ launch() {
     #fi
     
     lxc config set ${MACHINE_CONTAINER} raw.idmap "both ${UID} 1000"
-    lxc config set ${MACHINE_CONTAINER} limits.cpu 4;
+    lxc config set ${MACHINE_CONTAINER} limits.cpu "$(nproc)";
+    lxc config set ${MACHINE_CONTAINER} limits.cpu.allowance 50%
 
     # Packages SDKs (DAAL / KML / IPP / TBB / MPI)
     lxc config device add ${MACHINE_CONTAINER} data        disk source=${DATA_FOLDER}               path=/data;

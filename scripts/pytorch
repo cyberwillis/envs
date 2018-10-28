@@ -31,7 +31,47 @@ requirements()
     sudo apt install libeigen3-dev imagemagick graphviz -y
     #mkdir -p /var/python-repo-local/3.6
     pip download --exists-action 'i' -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
-    pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
+    pip install -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
+}
+
+update_openmpi_sources()
+{
+    cd $HOME
+    if [[ -d "$HOME/ompi" ]]; then
+        msg "Updating OpenMPI sources"
+        cd $HOME/ompi
+        git pull
+    else
+        msg "Cloning the OpenMPI sources"
+        git clone https://github.com/open-mpi/ompi.git
+    fi
+}
+
+update_pybind11_sources()
+{
+    cd $HOME
+    if [[ -d "$HOME/pybind11" ]]; then
+        msg "Updating Pybind11 sources"
+        cd $HOME/pybind11
+        git pull
+    else
+        msg "Cloning the Pybind11 sources"
+        git clone https://github.com/pybind/pybind11.git
+    fi
+}
+
+update_magma_sources()
+{
+    cd $HOME
+    if [[ -d "$HOME/magma" ]]; then
+        msg "Updating MAGMA sources"
+        cd $HOME/magma
+        hg pull
+        hg update default
+    else
+       msg "Clonning MAGMA sources"
+       hg clone https://bitbucket.org/icl/magma
+    fi
 }
 
 update_mkl_dnn_sources()
@@ -51,11 +91,11 @@ update_pytorch_sources()
 {
     cd $HOME
     if [[ -d "$HOME/pytorch" ]]; then
-        msg "Updating pytorch sources"
+        msg "Updating PyTorch sources"
         cd $HOME/pytorch
         git pull
     else
-        msg "Cloning the pytorch sources"
+        msg "Cloning the PyTorch sources"
         git clone --recurse https://github.com/pytorch/pytorch
     fi;
 }
@@ -86,15 +126,215 @@ update_tochtext_sources(){
     fi
 }
 
+build_openmpi_sources()
+{
+    msg "Building OpenMPI"
+    sudo apt update  -qq
+    sudo apt install -qqy ccache autoconf automake libtool flex
+    export CC="ccache gcc-7"
+    export CXX="ccache g++-7"
+
+    if [[ -d "$HOME/ompi" ]]; then
+
+        msg "OpenMPI already installed"
+
+    else
+    
+        cd $HOME/ompi
+        ./autogen.pl
+        
+        #./configure --prefix=/opt/openmpi-4.1.0 \
+        #            --with-cuda=/usr/local/cuda/ \
+        #            --with-cuda-libdir=/usr/local/cuda/lib64
+
+        ./configure --enable-mpi-thread-multiple \
+                    --prefix=/opt/openmpi-4.1.0 \
+                    --with-cuda=/usr/local/cuda/ \
+                    --with-cuda-libdir=/usr/local/cuda/lib64
+        make -j"$(nproc)" all
+        sudo make -j"$(nproc)" install
+
+        echo 'export PATH=/opt/openmpi-4.1.0/bin:$PATH' | tee -a $HOME/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/openmpi-4.1.0/lib:$LD_LIBRARY_PATH' | tee -a $HOME/.bashrc
+    fi
+
+  export PATH=/opt/openmpi-4.1.0/bin:$PATH
+  export LD_LIBRARY_PATH=/opt/openmpi-4.1.0/lib:$LD_LIBRARY_PATH
+  #verify
+  mpirun --version
+  #mpirun (Open MPI) 4.1.0a1
+  ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
+  #mca:mpi:base:param:mpi_built_with_cuda_support:value:true
+
+}
+
+build_pybind11_sources()
+{
+    msg "Building PyBind"
+    sudo apt update  -qq
+    sudo apt install -qqy libboost-all-dev
+
+    if [[ -d "$HOME/pybind11" ]]; then
+    
+        msg "PyBind11 already installed"
+
+    else
+        
+        mkdir -p $HOME/pybind11/build
+        cd $HOME/pybind11/build
+        cmake .. 
+        make -j"$(nproc)"
+        sudo make install
+
+        echo "export pybind11_DIR=/usr/local/share/cmake/pybind11" | tee -a $HOME/.bashrc
+        echo "export pybind11_INCLUDE_DIR=/usr/local/include/pybind11" | tee -a $HOME/.bashrc
+    fi
+
+    export pybind11_DIR=/usr/local/share/cmake/pybind11
+    export pybind11_INCLUDE_DIR=/usr/local/include/pybind11
+}
+
+install_mkl_packages()
+{
+    msg "Installing Intel Performance Libraries:"
+    if [[ -d "/opt/intel" ]];then
+
+        msg "MKL already installed"
+
+    else
+        
+        cd $HOME
+        mkdir -p $HOME/intel_installers
+
+        msg "Installing MKL - Intel Math Kernel Library"
+        # [MKL]
+        tar -xf /utils/intel/l_mkl_2019.0.117.tgz -C $HOME/intel_installers
+        cd $HOME/intel_installers/l_mkl_2019.0.117
+        if [[ -e "/utils/intel/mkl-silent.cfg" ]];then
+        sudo ./install.sh  --silent /utils/intel/mkl-silent.cfg
+        else
+        sudo ./install.sh  --duplicate /utils/intel/mkl-silent.cfg
+        fi
+
+        msg "Installing MPI - Intel MPI Library"
+        # [MPI]
+        tar -xf /utils/intel/l_mpi_2019.0.117.tgz -C $HOME/intel_installers/
+        cd $HOME/intel_installers/l_mpi_2019.0.117
+        if [[ -e "/utils/intel/mpi-silent.cfg" ]];then
+        sudo ./install.sh  --silent /utils/intel/mpi-silent.cfg
+        else
+        sudo ./install.sh  --duplicate /utils/intel/mpi-silent.cfg
+        fi
+
+        msg "Installing TBB - Intel Threading Building BLocks Library"
+        # [TBB]
+        tar -xf /utils/intel/l_tbb_2019.0.117.tgz -C $HOME/intel_installers
+        cd $HOME/intel_installers/l_tbb_2019.0.117
+        if [[ -e "/utils/intel/tbb-silent.cfg" ]];then
+        sudo ./install.sh  --silent /utils/intel/tbb-silent.cfg
+        else
+        sudo ./install.sh  --duplicate /utils/intel/tbb-silent.cfg
+        fi
+
+        msg "Installing IPP - Intel Integrated Performance Primitives"
+        # [IPP]
+        tar -xf /utils/intel/l_ipp_2019.0.117.tgz -C $HOME/intel_installers/
+        cd $HOME/intel_installers/l_ipp_2019.0.117
+        if [[ -e "/utils/intel/ipp-silent.cfg" ]];then
+        sudo ./install.sh  --silent /utils/intel/ipp-silent.cfg
+        else
+        sudo ./install.sh  --duplicate /utils/intel/ipp-silent.cfg
+        fi
+
+        msg "Installing DAAL - Intel Data Analytics Acceleration Library"
+        # [DAAL]
+        tar -xf /utils/intel/l_daal_2019.0.117.tgz -C $HOME/intel_installers/
+        cd $HOME/intel_installers/l_daal_2019.0.117
+        if [[ -e "/utils/intel/daal-silent.cfg" ]];then
+        sudo ./install.sh  --silent /utils/intel/daal-silent.cfg
+        else
+        sudo ./install.sh  --duplicate /utils/intel/daal-silent.cfg
+        fi
+
+        echo 'export MKLROOT=/opt/intel/mkl' | tee -a $HOME/.bashrc
+        echo 'export MKL_ROOT=$MKLROOT' | tee -a $HOME/.bashrc
+        echo 'export MKL_INCLUDE=$MKL_ROOT/include' | tee -a $HOME/.bashrc
+        echo 'export MKL_LIBRARY=$MKL_ROOT/lib/intel64' | tee -a $HOME/.bashrc
+        echo 'source /opt/intel/mkl/bin/mklvars.sh intel64' | tee -a $HOME/.bashrc
+        echo 'source /opt/intel/bin/compilervars.sh intel64' | tee -a $HOME/.bashrc
+        echo 'export CMAKE_INCLUDE_PATH=$MKL_INCLUDE:$CMAKE_INCLUDE_PATH' | tee -a $HOME/.bashrc
+        echo 'export CMAKE_LIBRARY_PATH=$MKL_LIBRARY:$CMAKE_LIBRARY_PATH' | tee -a $HOME/.bashrc
+
+    fi
+
+    export MKLROOT=/opt/intel/mkl
+    export MKL_ROOT=$MKLROOT
+    export MKL_INCLUDE=$MKL_ROOT/include
+    export MKL_LIBRARY=$MKL_ROOT/lib/intel64
+    #source /opt/intel/mkl/bin/mklvars.sh intel64
+    . /opt/intel/mkl/bin/mklvars.sh intel64
+    #source /opt/intel/bin/compilervars.sh intel64
+    . /opt/intel/bin/compilervars.sh intel64
+    export CMAKE_INCLUDE_PATH=$MKL_INCLUDE:$CMAKE_INCLUDE_PATH
+    export CMAKE_LIBRARY_PATH=$MKL_LIBRARY:$CMAKE_LIBRARY_PATH
+}
+
+build_magma_sources()
+{
+    msg "Building MAGMA"
+    #sudo apt install liblapack-dev libblas-dev 
+    #sudo apt remove -qqy libblas-common libblas-dev libblas3 liblapack-dev liblapack3
+    #sudo apt remove -qqy libblas-common libblas-dev libblas3 libopenblas-base libopenblas-dev
+    sudo apt update  -qq
+    sudo apt install -qqy libopenblas-dev
+    sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
+
+    if [[ -d "$HOME/magma" ]];then
+
+        msg "MAGMA alreadu installed"
+
+    else
+        cd $HOME/magma
+
+        cat << EOF | tee $HOME/magma/make.inc
+CUDADIR=/usr/local/cuda
+MKLROOT=/opt/intel/mkl
+FORT=gfortran
+FPIC= -fPIC
+GPU_TARGET=sm_30
+#MIN_ARCH=300
+#NV_SM= -gencode arch=compute_30,code=sm_30
+#NV_COMP= -gencode arch=compute_30,code=compute_30
+EOF
+        make -j"$(nproc)" all
+        #sudo make install prefix=/opt/magma
+        sudo make install prefix=/usr
+        sudo ldconfig
+    fi
+}
+
 build_mkl_dnn_sources()
 {
     msg "Building mkl-dnn"
-    cd $HOME/mkl-dnn/scripts
+    sudo apt update  -qq
+    sudo apt install -qqy doxygen
+    
+    #msg "Installing MKL-lightweight"
+    #cd $HOME/mkl-dnn/scripts
     #./prepare_mkl.sh
+
     mkdir $HOME/mkl-dnn/build -p
     cd $HOME/mkl-dnn/build
-    cmake ..
-    make -j8
+    cmake -DCMAKE_INSTALL_PREFIX=/usr \
+          -DMKLDNN_LIBRARY_TYPE=SHARED \
+          -DMKLDNN_THREADING=OMP:COMP \
+          .. 
+    #      -DMKLDNN_USE_MKL=NONE \
+    #      -DWITH_EXAMPLE=OFF \
+    #      -DWITH_TEST=OFF \
+    #      -DCMAKE_BUILD_TYPE=release \
+
+    make -j"$(nproc)"
     sudo make install
     sudo ldconfig
 }
@@ -115,7 +355,7 @@ build_pytorch_sources()
         export NO_SYSTEM_NCCL=1 
         export WITH_DISTRIBUTED=1 
         python3 setup.py build_deps
-        python3 setup.py develop --user
+        python3 setup.py develop
         python3 setup.py bdist_wheel
     else
         #WITH_DISTRIBUTED=1
@@ -128,7 +368,7 @@ build_pytorch_sources()
         #export MKLDNN_LIBRARY=/usr/local/lib 
         #export MKLDNN_INCLUDE_DIR=/usr/local/include
         python3 setup.py build_deps
-        python3 setup.py develop --user
+        python3 setup.py develop
         python3 setup.py bdist_wheel
     fi
     
@@ -137,7 +377,7 @@ build_pytorch_sources()
     mv /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old/
     cp $HOME/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/
     
-    pip install --user $HOME/pytorch/dist/torch*.whl
+    pip install $HOME/pytorch/dist/torch*.whl
     cd $HOME/pytorch/docs
     msg "Building pytorch docset"
     make docset PYCMD=python3
@@ -157,7 +397,7 @@ build_torchvision_sources()
         rm -rf $HOME/vision/dist
     fi
     python3 setup.py bdist_wheel
-    pip install --user $HOME/vision/dist/torchvision*.whl
+    pip install $HOME/vision/dist/torchvision*.whl
     mv $HOME/vision/dist/torchvision*.whl /var/python-repo-local/3.6/
 
     msg "Building torchvision docset"
@@ -174,19 +414,23 @@ build_torchtext_sources()
 {
     msg "Building torchtext"
     cd $HOME/text
+    
     if [[ -e "$HOME/text/dist" ]];then
         rm -rf $HOME/text/dist
     fi
+
     python3 setup.py bdist_wheel
-    pip install --user $HOME/text/dist/torchtext*.whl
+    pip install $HOME/text/dist/torchtext*.whl
     mv $HOME/text/dist/torchtext*.whl /var/python-repo-local/3.6/
 
     msg "Building torchtext docset"
     cd $HOME/text/docs
     make docset
+    
     if [[ -e "/frameworks/Zeal/docsets/torchtext.docset" ]];then
         rm -rf  /frameworks/Zeal/docsets/torchtext.docset
     fi 
+
     cp -R $HOME/text/docs/torchtext.docset /frameworks/Zeal/docsets/
     #torchtext.docset
 }
@@ -195,17 +439,22 @@ build()
 {
     requirements;
 
+    update_openmpi_sources;
+    update_pybind11_sources;
+    update_magma_sources;
     update_mkl_dnn_sources;
     update_pytorch_sources;
     update_torchvision_sources;
     update_tochtext_sources
 
+    build_openmpi_sources;
+    build_pybind11_sources;
+    install_mkl_packages;
+    build_magma_sources;
     build_mkl_dnn_sources;
     build_pytorch_sources;
     build_torchvision_sources;
-    build_torchtext_sources
-    
-    pip install --user torchtext
+    build_torchtext_sources   
 }
 
 source /scripts/.env
