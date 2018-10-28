@@ -48,7 +48,7 @@ matplotlib
 mistune
 nbconvert
 nbformat
-notebook
+notebook==5.6.0
 olefile
 pandocfilters
 path.py
