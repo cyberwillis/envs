@@ -1,0 +1,77 @@
+#!/bin/bash -e
+
+source ./.env
+
+#export MACHINE_CONTAINER=;
+#export USE_GPU=;
+#export LOCAL_REPOSITORY=;
+#export MACHINE_BASE=;
+#export CUDA_VERSION=10.0;
+#export NVIDIA_PLATFORM=;
+
+#export BACKUPS_FOLDER=;
+#export DATA_FOLDER=;
+#export FRAMEWORKS_FOLDER=;
+#export REPOSITORY_FOLDER=;
+#export PROJECTS_FOLDER=;
+#export SCRIPTS_FOLDER=;
+#export UTILS_FOLDER=;
+#export SHARED_FOLDER=;
+#export NVIDIA_REPO_LOCAL=;
+#export NVIDIA_REPO_MIRROR=;
+#export INSTALL_NVIDIA_DRIVER=;
+
+#export PYTHON_VERSION=;
+#export JAVASCRIT_KERNEL=;
+#export JULIA_KERNEL=;
+#export R_KERNEL=;
+#export OCTAVE_KERNEL=;
+
+RESET='\033[0m';
+COLOR='\033[1;32m';
+msg() {
+  echo -e "${COLOR}$(date): $1${RESET}";
+}
+
+launch() {
+
+    CUDA_VERSION=$(lxc )
+    msg "Hooking container: ($MACHINE_CONTAINER)";
+    msg "Defining maps"
+    lxc config set $MACHINE_CONTAINER raw.idmap "both $UID 1000"
+    #lxc stop $MACHINE_CONTAINER
+    #lxc config set $MACHINE_CONTAINER limits.cpu $(nproc);
+
+    # Packages SDKs (DAAL / KML / IPP / TBB / MPI)
+    lxc config device add $MACHINE_CONTAINER data        disk source=$DATA_FOLDER               path=/data;
+    lxc config device add $MACHINE_CONTAINER frameworks  disk source=$FRAMEWORKS_FOLDER         path=/frameworks;
+    lxc config device add $MACHINE_CONTAINER projects    disk source=$PROJECTS_FOLDER           path=/projects;
+    lxc config device add $MACHINE_CONTAINER scripts     disk source=$SCRIPTS_FOLDER            path=/scripts;
+    lxc config device add $MACHINE_CONTAINER utils       disk source=$UTILS_FOLDER              path=/utils;
+    lxc config device add $MACHINE_CONTAINER shared      disk source=$SHARED_FOLDER             path=/shared;
+    lxc config device add $MACHINE_CONTAINER python      disk source=$REPOSITORY_FOLDER/python  path=/var/python-repo-local
+    #lxc stop $MACHINE_CONTAINER
+    
+    if [[ $USE_GPU == 'yes' ]];then
+
+      lxc config device add $MACHINE_CONTAINER gtx gpu;
+
+      if [[ $INSTALL_NVIDIA_DRIVER == 'no' ]]; then
+        lxc config set $MACHINE_CONTAINER nvidia.runtime true
+        lxc config set $MACHINE_CONTAINER nvidia.driver.capabilities "all";
+        lxc config set $MACHINE_CONTAINER nvidia.require.driver ">=340";
+      fi
+
+      #NVIDIA-MIRROR-REPOSITORY
+      if [[ $LOCAL_REPOSITORY == 'yes' ]];then
+        lxc config device add $MACHINE_CONTAINER nvidia-repository  disk  source=$NVIDIA_REPO_MIRROR_FOLDER  path=/repository
+      fi
+    fi
+    lxc start $MACHINE_CONTAINER
+    sleep 10s;
+}
+
+if [[ "$#" -gt 0 ]]; then
+  MACHINE_CONTAINER="$1";
+  launch
+fi

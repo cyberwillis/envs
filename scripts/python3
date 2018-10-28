@@ -44,7 +44,7 @@ install_pyenv() {
 
     pyenv install ${PYTHON_VERSION}
     pyenv local ${PYTHON_VERSION}
-    pip install -U pip
+    pip install --user -U pip
 
     sudo apt remove -qqy python3-pip
 

@@ -45,33 +45,33 @@ msg "Installing Jupyterlab"
 #mkdir -p /var/python-repo-local/3.6
 cd ${HOME}
 pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/3.6 
-pip install -U -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
+pip install --user -U -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
 
 msg "Enabling ipyparallel extension"
 ipcluster start --n=8 --ip=* --daemonize && ipcluster stop
-jupyter nbextension install ipyparallel --py
-jupyter nbextension enable ipyparallel --py
-jupyter serverextension enable ipyparallel --py
+jupyter nbextension install ipyparallel --user
+jupyter nbextension enable ipyparallel --user
+jupyter serverextension enable ipyparallel --user
 
 msg "Enabling ipyparallel widgets extentions"
-jupyter nbextension enable widgetsnbextension --py
+jupyter nbextension enable widgetsnbextension --user
 
 msg "Enabling extentions configuration"
-jupyter nbextensions_configurator enable
+jupyter nbextensions_configurator enable --user
 
 msg "Enabling contribution extentions"
-jupyter contrib nbextension install
+jupyter contrib nbextension install --user
 
 msg "Enabling server extentions"
-jupyter serverextension enable jupyterlab --py
+jupyter serverextension enable jupyterlab --user
 
 msg "Generating jupyterlab configuration file" #msg "Fixing Avahi multi-task limitation between Host and Guest"
 jupyter-notebook --generate-config -y
 
 
 # https://ipython.org/ipython-doc/3/notebook/public_server.html
-echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl'" | tee -a ${HOME}/.bashrc
-echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision'" | tee -a ${HOME}/.bashrc
+echo "alias tflow='pip uninstall tensorflow -y && pip install --user /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl'" | tee -a ${HOME}/.bashrc
+echo "alias ptorch='pip uninstall torch -y && pip install --user /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision'" | tee -a ${HOME}/.bashrc
 echo "export JUPYTER_PORT=8888"  | tee -a ${HOME}/.bashrc
 
 source /scripts/.env
@@ -89,7 +89,7 @@ echo "alias jlabt=\"jupyter lab --port=\${JUPYTER_PORT} --ip=\${JUPYTER_IP} --no
 echo 'export TORCH_MODEL_ZOO=/data/torch/models' | tee -a ~/.bashrc 
 
 pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/3.6
-pip install -U -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
+pip install --user -U -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
 
 msg "Jupyter Notebook as Service"
 cd ${HOME}

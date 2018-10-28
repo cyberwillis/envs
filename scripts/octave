@@ -46,4 +46,4 @@ sudo apt install -qqy --no-install-recommends \
                          octave
 
 msg "Installing Octave kernel for Jupyter"
-pip install -U metakernel octave_kernel
+pip install --user -U metakernel octave_kernel

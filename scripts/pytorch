@@ -30,7 +30,7 @@ requirements()
     sudo apt install libeigen3-dev imagemagick graphviz -y
     #mkdir -p /var/python-repo-local/3.6
     pip download --exists-action 'i' -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
-    pip install -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
+    pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
 }
 
 update_openmpi_sources()
@@ -376,7 +376,7 @@ build_pytorch_sources()
     mv /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old/
     cp ${HOME}/pytorch/dist/torch*.whl /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/
     
-    pip install ${HOME}/pytorch/dist/torch*.whl
+    pip install --user ${HOME}/pytorch/dist/torch*.whl
     cd ${HOME}/pytorch/docs
     msg "Building pytorch docset"
     make docset PYCMD=python3
@@ -396,7 +396,7 @@ build_torchvision_sources()
         rm -rf ${HOME}/vision/dist
     fi
     python3 setup.py bdist_wheel
-    pip install ${HOME}/vision/dist/torchvision*.whl
+    pip install --user ${HOME}/vision/dist/torchvision*.whl
     mv ${HOME}/vision/dist/torchvision*.whl /var/python-repo-local/3.6/
 
     msg "Building torchvision docset"
@@ -419,7 +419,7 @@ build_torchtext_sources()
     fi
 
     python3 setup.py bdist_wheel
-    pip install ${HOME}/text/dist/torchtext*.whl
+    pip install --user ${HOME}/text/dist/torchtext*.whl
     mv ${HOME}/text/dist/torchtext*.whl /var/python-repo-local/3.6/
 
     msg "Building torchtext docset"
