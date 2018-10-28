@@ -13,9 +13,10 @@ COLOR='\033[1;32m'
 msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
+
 cd ${HOME}
 if [[ "$#" -gt 0 ]];then
-  echo "OK"
+  
   PYTHON_VERSION="$1"
   
   export PYENV_ROOT=${HOME}/.pyenv
@@ -36,7 +37,7 @@ if [[ "$#" -gt 0 ]];then
   #export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
 
   #msg "Installing Pre-requisites for docs"
-  #sudo apt-get -qy install pandoc texlive-xetex
+  #sudo apt-get -qqy install pandoc texlive-xetex
 fi
 
 msg "Installing Jupyterlab"
@@ -45,33 +46,32 @@ msg "Installing Jupyterlab"
 cd ${HOME}
 pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/3.6 
 pip install -U -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
-#pip install --upgrade --user -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
 
 msg "Enabling ipyparallel extension"
 ipcluster start --n=8 --ip=* --daemonize && ipcluster stop
-jupyter nbextension install ipyparallel --py --user
-jupyter nbextension enable ipyparallel --py --user
-jupyter serverextension enable ipyparallel --py --user
+jupyter nbextension install ipyparallel --py
+jupyter nbextension enable ipyparallel --py
+jupyter serverextension enable ipyparallel --py
 
 msg "Enabling ipyparallel widgets extentions"
-jupyter nbextension enable widgetsnbextension --py --user
+jupyter nbextension enable widgetsnbextension --py
 
 msg "Enabling extentions configuration"
-jupyter nbextensions_configurator enable --user
+jupyter nbextensions_configurator enable
 
 msg "Enabling contribution extentions"
-jupyter contrib nbextension install --user
+jupyter contrib nbextension install
 
 msg "Enabling server extentions"
-jupyter serverextension enable jupyterlab --py --user
+jupyter serverextension enable jupyterlab --py
 
 msg "Generating jupyterlab configuration file" #msg "Fixing Avahi multi-task limitation between Host and Guest"
 jupyter-notebook --generate-config -y
 
 
 # https://ipython.org/ipython-doc/3/notebook/public_server.html
-echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl --user'" | tee -a ${HOME}/.bashrc
-echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision --user'" | tee -a ${HOME}/.bashrc
+echo "alias tflow='pip uninstall tensorflow -y && pip install /frameworks/Tensorflow/tensorflow_pkg/\$HOSTNAME_PREFIX\$VERSION/tensorflow*.whl'" | tee -a ${HOME}/.bashrc
+echo "alias ptorch='pip uninstall torch -y && pip install /var/python-repo-local/3.6/\$HOSTNAME_PREFIX\$VERSION/torch*.whl torchvision'" | tee -a ${HOME}/.bashrc
 echo "export JUPYTER_PORT=8888"  | tee -a ${HOME}/.bashrc
 
 source /scripts/.env
@@ -90,7 +90,6 @@ echo 'export TORCH_MODEL_ZOO=/data/torch/models' | tee -a ~/.bashrc
 
 pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/3.6
 pip install -U -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
-#pip install --user -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
 
 msg "Jupyter Notebook as Service"
 cd ${HOME}

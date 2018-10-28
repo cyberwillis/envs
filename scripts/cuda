@@ -156,6 +156,8 @@ register_remote_repository() {
 }
 
 install_cuda_packages() {
+
+  sudo apt update -qq
   if [[ ${VERSION} == "10.0" ]];then
 
     msg "Installing Cuda Toolkit ${VERSION}"
@@ -300,7 +302,6 @@ install_cuda_10_0() {
 
   register_remote_repository;
 
-  sudo apt update
   install_cuda_packages;
 }
 
@@ -315,7 +316,6 @@ install_cuda_9_2() {
 
   register_remote_repository;
 
-  sudo apt update
   install_cuda_packages;
 }
 
@@ -329,7 +329,6 @@ install_cuda_9_1() {
 
   register_remote_repository;    
 
-  sudo apt update
   install_cuda_packages;
 }
 
@@ -344,7 +343,6 @@ install_cuda_9_0() {
 
   register_remote_repository;
 
-  sudo apt update;
   install_cuda_packages;
 }
 
@@ -358,7 +356,6 @@ install_cuda_8_0() {
 
   register_remote_repository;
 
-  sudo apt update;
   install_cuda_packages;
 }
 
@@ -383,6 +380,7 @@ install_cuda() {
 
 register_libraries_path() {
 
+  msg "Registering Paths and Libraries"
   # PATH for CUDA
   # LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64
   # LIBRARY_PATH /usr/local/cuda/lib64/stubs
@@ -403,6 +401,7 @@ register_libraries_path() {
 
 install_cudnn7() {
 
+  msg "Installing CuDNN"
   if [[ ${VERSION} == "9.0" || ${VERSION} == "9.2" || ${VERSION} == "10.0" ]];then
     # compatible with 9.0 and 10.0
     export CUDNN_PKG_VERSION=7.3.1.20

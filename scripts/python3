@@ -18,6 +18,7 @@ msg() {
 
 install_pyenv() {
 
+    msg "Installing Python3 ${PYTHON_VERSION} for PyEnv"
     sudo apt install -qqy  python3-pip \
                            openssl \
                            libbz2-dev \
@@ -44,7 +45,6 @@ install_pyenv() {
     pyenv install ${PYTHON_VERSION}
     pyenv local ${PYTHON_VERSION}
     pip install -U pip
-    #--user
 
     sudo apt remove -qqy python3-pip
 
