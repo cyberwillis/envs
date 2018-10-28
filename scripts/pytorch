@@ -9,7 +9,9 @@ echo "\/     \__, \/   \___/|_|  \___|_| |_| ";
 echo "       |___/                           ";
 
 export COMPUTE_CAPABILITY="7.0"
-export PARAM="req"
+export ACTION="req"
+
+source /scripts/.env
 
 RESET='\033[0m'
 COLOR='\033[1;32m'
@@ -21,7 +23,12 @@ msg() {
 requirements() 
 {
     msg "Installing Requirements"
-    sudo apt update;
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    sudo apt update -qq
+    sudo apt upgrade -y
+    sudo apt install -yq gcc-6 gcc-7 gcc-8 g++-6 g++-7 g++-8
+    sudo ln -s -f /usr/bin/gcc-7 /usr/bin/gcc
+    sudo ln -s -f /usr/bin/g++-7 /usr/bin/g++
     
     #THD dependencies
     sudo apt install libasio-dev mpich libopenmpi-dev -y
@@ -107,7 +114,7 @@ update_torchvision_sources()
         cd ${HOME}/vision
         git pull
     else
-        msg "Cloning torchvision sources"
+        msg "Cloning torchvision sources"${HOME}/ompi
         git clone --recurse https://github.com/pytorch/vision.git
     fi
 }
@@ -133,7 +140,7 @@ build_openmpi_sources()
     export CC="ccache gcc-7"
     export CXX="ccache g++-7"
 
-    if [[ -d "${HOME}/ompi" ]]; then
+    if [[ -d "/opt/openmpi-4.1.0" ]]; then
 
         msg "OpenMPI already installed"
 
@@ -173,21 +180,14 @@ build_pybind11_sources()
     sudo apt update  -qq
     sudo apt install -qqy libboost-all-dev
 
-    if [[ -d "${HOME}/pybind11" ]]; then
-    
-        msg "PyBind11 already installed"
+    mkdir -p ${HOME}/pybind11/build
+    cd ${HOME}/pybind11/build
+    cmake .. 
+    make -j"$(nproc)"
+    sudo make install
 
-    else
-        
-        mkdir -p ${HOME}/pybind11/build
-        cd ${HOME}/pybind11/build
-        cmake .. 
-        make -j"$(nproc)"
-        sudo make install
-
-        echo "export pybind11_DIR=/usr/local/share/cmake/pybind11" | tee -a ${HOME}/.bashrc
-        echo "export pybind11_INCLUDE_DIR=/usr/local/include/pybind11" | tee -a ${HOME}/.bashrc
-    fi
+    echo "export pybind11_DIR=/usr/local/share/cmake/pybind11" | tee -a ${HOME}/.bashrc
+    echo "export pybind11_INCLUDE_DIR=/usr/local/include/pybind11" | tee -a ${HOME}/.bashrc
 
     export pybind11_DIR=/usr/local/share/cmake/pybind11
     export pybind11_INCLUDE_DIR=/usr/local/include/pybind11
@@ -245,15 +245,15 @@ install_mkl_packages()
         sudo ./install.sh  --duplicate /utils/intel/ipp-silent.cfg
         fi
 
-        msg "Installing DAAL - Intel Data Analytics Acceleration Library"
-        # [DAAL]
-        tar -xf /utils/intel/l_daal_2019.0.117.tgz -C ${HOME}/intel_installers/
-        cd ${HOME}/intel_installers/l_daal_2019.0.117
-        if [[ -e "/utils/intel/daal-silent.cfg" ]];then
-        sudo ./install.sh  --silent /utils/intel/daal-silent.cfg
-        else
-        sudo ./install.sh  --duplicate /utils/intel/daal-silent.cfg
-        fi
+        #msg "Installing DAAL - Intel Data Analytics Acceleration Library"
+        ## [DAAL]
+        #tar -xf /utils/intel/l_daal_2019.0.117.tgz -C ${HOME}/intel_installers/
+        #cd ${HOME}/intel_installers/l_daal_2019.0.117
+        #if [[ -e "/utils/intel/daal-silent.cfg" ]];then
+        #sudo ./install.sh  --silent /utils/intel/daal-silent.cfg
+        #else
+        #sudo ./install.sh  --duplicate /utils/intel/daal-silent.cfg
+        #fi
 
         echo 'export MKLROOT=/opt/intel/mkl' | tee -a ${HOME}/.bashrc
         echo 'export MKL_ROOT=${MKLROOT}' | tee -a ${HOME}/.bashrc
@@ -271,9 +271,9 @@ install_mkl_packages()
     export MKL_INCLUDE=${MKL_ROOT}/include
     export MKL_LIBRARY=${MKL_ROOT}/lib/intel64
     #source /opt/intel/mkl/bin/mklvars.sh intel64
-    . /opt/intel/mkl/bin/mklvars.sh intel64
+    #. /opt/intel/mkl/bin/mklvars.sh intel64
     #source /opt/intel/bin/compilervars.sh intel64
-    . /opt/intel/bin/compilervars.sh intel64
+    #. /opt/intel/bin/compilervars.sh intel64
     export CMAKE_INCLUDE_PATH=${MKL_INCLUDE}:${CMAKE_INCLUDE_PATH}
     export CMAKE_LIBRARY_PATH=${MKL_LIBRARY}:${CMAKE_LIBRARY_PATH}
 }
@@ -287,15 +287,10 @@ build_magma_sources()
     sudo apt update  -qq
     sudo apt install -qqy libopenblas-dev
     sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
+    
+    cd ${HOME}/magma
 
-    if [[ -d "${HOME}/magma" ]];then
-
-        msg "MAGMA alreadu installed"
-
-    else
-        cd ${HOME}/magma
-
-        cat << EOF | tee ${HOME}/magma/make.inc
+    cat << EOF | tee ${HOME}/magma/make.inc
 CUDADIR=/usr/local/cuda
 MKLROOT=/opt/intel/mkl
 FORT=gfortran
@@ -305,11 +300,10 @@ GPU_TARGET=sm_30
 #NV_SM= -gencode arch=compute_30,code=sm_30
 #NV_COMP= -gencode arch=compute_30,code=compute_30
 EOF
-        make -j"$(nproc)" all
-        #sudo make install prefix=/opt/magma
-        sudo make install prefix=/usr
-        sudo ldconfig
-    fi
+    make -j"$(nproc)" all
+    #sudo make install prefix=/opt/magma
+    sudo make install prefix=/usr
+    sudo ldconfig
 }
 
 build_mkl_dnn_sources()
@@ -436,7 +430,7 @@ build_torchtext_sources()
 
 build()
 {
-    if [[ ${PARAM} == "req" || ${PARAM} == "all" ]];then
+    if [[ "${ACTION}" == "req" || "${ACTION}" == "all" ]];then
         requirements;
 
         update_openmpi_sources;
@@ -454,20 +448,21 @@ build()
         build_mkl_dnn_sources;
     fi
 
-    if [[ ${PARAM} == "build" || ${PARAM} == "all" ]];then
+    if [[ "${ACTION}" == "build" || ${ACTION} == "all" ]];then
         build_pytorch_sources;
         build_torchvision_sources;
         build_torchtext_sources;
     fi
 }
 
-source /scripts/.env
-
 if [[ "$#" -gt 0 ]];then
-    PARAM="$1"
+    ACTION="$1"
 else
-    echo "(build, req, all) [default='req']"
-    read PARAM
+    echo "(build, req, all) [default=${ACTION}]"
+    read _PARAM_
+    if [[ "${_PARAM_}" != "" ]];then
+        ACTION="${_PARAM_}"
+    fi
 fi
 
 build;
