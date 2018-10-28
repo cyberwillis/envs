@@ -49,12 +49,12 @@ pip install --user -U -r /projects/requirements.generic -f /var/python-repo-loca
 
 msg "Enabling ipyparallel extension"
 ipcluster start --n=8 --ip=* --daemonize && ipcluster stop
-jupyter nbextension install ipyparallel --user
-jupyter nbextension enable ipyparallel --user
-jupyter serverextension enable ipyparallel --user
+jupyter nbextension install ipyparallel --py --user
+jupyter nbextension enable ipyparallel --py --user
+jupyter serverextension enable ipyparallel --py --user
 
 msg "Enabling ipyparallel widgets extentions"
-jupyter nbextension enable widgetsnbextension --user
+jupyter nbextension enable widgetsnbextension --py --user
 
 msg "Enabling extentions configuration"
 jupyter nbextensions_configurator enable --user
@@ -63,7 +63,7 @@ msg "Enabling contribution extentions"
 jupyter contrib nbextension install --user
 
 msg "Enabling server extentions"
-jupyter serverextension enable jupyterlab --user
+jupyter serverextension enable jupyterlab --py --user
 
 msg "Generating jupyterlab configuration file" #msg "Fixing Avahi multi-task limitation between Host and Guest"
 jupyter-notebook --generate-config -y
@@ -103,7 +103,9 @@ Description=Jupyter Notebook
 [Service]
 Type=simple
 PIDFile=/run/jupyter.pid
-ExecStart=/bin/bash -c "/home/ubuntu/.pyenv/shims/jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.password=${JUPYTER_SECRET}  --NotebookApp.notebook_dir=/projects --allow-root --config=/home/ubuntu/.jupyter/jupyter_notebook_config.py"
+ExecStart=/bin/bash -c "/home/ubuntu/.local/bin/jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.password=${JUPYTER_SECRET}  --NotebookApp.notebook_dir=/projects --allow-root --config=/home/ubuntu/.jupyter/jupyter_notebook_config.py"
+#ExecStart=/bin/bash -c "/home/ubuntu/.pyenv/shims/jupyter notebook --port=${JUPYTER_PORT} --ip=${JUPYTER_IP} --no-browser --NotebookApp.password=${JUPYTER_SECRET}  --NotebookApp.notebook_dir=/projects --allow-root --config=/home/ubuntu/.jupyter/jupyter_notebook_config.py"
+
 User=ubuntu
 Group=ubuntu
 WorkingDirectory=/home/ubuntu/
