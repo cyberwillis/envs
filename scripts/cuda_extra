@@ -21,17 +21,18 @@ msg() {
 }
 
 msg "Installing Nvidia-Driver"
-nvidia_driver=NVIDIA-Linux-x86_64-410.73.run
-chmod +x /utils/nvidia/drivers/${nvidia_driver} 
-sudo sh /utils/nvidia/drivers/${nvidia_driver} -s -i --no-drm --no-kernel-module --no-backup --no-nouveau-check
+#nvidia_driver=NVIDIA-Linux-x86_64-410.73.run
+#chmod +x /utils/nvidia/drivers/${nvidia_driver} 
+#sudo sh /utils/nvidia/drivers/${nvidia_driver} -s -i --no-drm --no-kernel-module --no-backup --no-nouveau-check
 
-#sudo add-apt-repository ppa:graphics-drivers/ppa -y
-#sudo apt-get update
-#sudo apt install -qqy --allow-unauthenticated --no-install-recommends cuda-drivers
-#                  libcuda1-410 \
-#                  libxnvctrl0 \
-#                  nvidia-410 \
-#                  nvidia-410-dev \
-#                  nvidia-libopencl1-410 \
-#                  nvidia-opencl-icd-410 \
-#                  nvidia-settings
+sudo add-apt-repository ppa:graphics-drivers/ppa -y
+sudo apt update -qq
+sudo apt install -qqy --allow-unauthenticated --no-install-recommends cuda-drivers
+
+# libcuda1-410 \
+# libxnvctrl0 \
+# nvidia-410 \
+# nvidia-410-dev \
+# nvidia-libopencl1-410 \
+# nvidia-opencl-icd-410 \
+# nvidia-settings
