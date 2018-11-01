@@ -25,21 +25,34 @@ requirements()
     msg "Installing Requirements"
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     sudo apt update -qq
-    sudo apt upgrade -y
-    sudo apt install -yq gcc-6 gcc-7 gcc-8 g++-6 g++-7 g++-8
+    sudo apt upgrade -qqy
+    sudo apt install -qqy ccache 
+    sudo apt install -qqy gcc-6 g++-6 gfortran-6 libgfortran-6-dev \
+                        gcc-7  g++-7 gfortran-7 libgfortran-7-dev \
+                        gcc-8  g++-8 gfortran-8 libgfortran-8-dev \
+                        fort77
+
     sudo ln -s -f /usr/bin/gcc-7 /usr/bin/gcc
     sudo ln -s -f /usr/bin/g++-7 /usr/bin/g++
+    sudo ln -s -f /usr/bin/gfortran-7 /usr/bin/gfortran
     
     #THD dependencies
-    sudo apt install libasio-dev mpich libopenmpi-dev -y
+    sudo apt install -qqy libasio-dev mpich libopenmpi-dev
 
     #Pytorch Requirements
-    sudo apt install libeigen3-dev imagemagick graphviz -y
+    sudo apt install -qqy libeigen3-dev imagemagick graphviz
     #mkdir -p /var/python-repo-local/3.6
+
+    #Tests
+    sudo apt install -qqy libgflags-dev libgoogle-glog-dev libprotobuf-dev
+
     pip download --exists-action 'i' -r /projects/requirements.pytorch -d /var/python-repo-local/3.6
     pip install --user -r /projects/requirements.pytorch -f /var/python-repo-local/3.6
 }
 
+# OpenMpi
+# https://www.open-mpi.org/
+# https://github.com/open-mpi/ompi.git
 update_openmpi_sources()
 {
     cd ${HOME}
@@ -52,7 +65,58 @@ update_openmpi_sources()
         git clone https://github.com/open-mpi/ompi.git
     fi
 }
+build_openmpi_sources()
+{
+    msg "Building OpenMPI"
 
+    sudo apt update  -qq
+    sudo apt install -qqy ccache autoconf automake libtool flex
+
+    if [[ -d "/opt/openmpi" ]]; then
+
+        msg "OpenMPI already installed"
+        msg "For Change version, DO IT MANUALLY"
+
+    else
+        export CC="ccache gcc-7"
+        export CXX="ccache g++-7"
+        export FC="ccache gfortran-7"
+        cd ${HOME}/ompi
+        ./autogen.pl
+        
+        #./configure --prefix=/opt/openmpi-4.1.0 \
+        #            --with-cuda=/usr/local/cuda/ \
+        #            --with-cuda-libdir=/usr/local/cuda/lib64
+
+        ./configure --enable-mpi-thread-multiple \
+                    --with-cuda=/usr/local/cuda/ \
+                    --with-cuda-libdir=/usr/local/cuda/lib64 \
+                    --prefix=/opt/openmpi
+                    #--prefix=/usr
+
+        make -j"$(nproc)" all
+        
+        sudo make -j"$(nproc)" install
+        
+        echo '# [OpenBLAS]' | tee -a ${HOME}/.bashrc
+        echo 'export PATH=/opt/openmpi/bin:${PATH}' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/openmpi/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        echo '/opt/openmpi/lib' | sudo tee /etc/ld.so.conf.d/openmpi.conf
+
+        export PATH=/opt/openmpi/bin:${PATH}
+        export LD_LIBRARY_PATH=/opt/openmpi/lib:${LD_LIBRARY_PATH}
+
+        sudo ldconfig
+
+        #[Verify]
+        mpirun --version
+        #mpirun (Open MPI) 4.1.0a1
+        ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
+        #mca:mpi:base:param:mpi_built_with_cuda_support:value:true
+    fi
+}
+
+# PyBynd11
 update_pybind11_sources()
 {
     cd ${HOME}
@@ -65,115 +129,6 @@ update_pybind11_sources()
         git clone https://github.com/pybind/pybind11.git
     fi
 }
-
-update_magma_sources()
-{
-    cd ${HOME}
-    if [[ -d "${HOME}/magma" ]]; then
-        msg "Updating MAGMA sources"
-        cd ${HOME}/magma
-        hg pull
-        hg update default
-    else
-       msg "Clonning MAGMA sources"
-       hg clone https://bitbucket.org/icl/magma
-    fi
-}
-
-update_mkl_dnn_sources()
-{
-    cd ${HOME}
-    if [[ -d "${HOME}/mkl-dnn" ]]; then
-        msg "Updating mkl-dnn sources"
-        cd ${HOME}/mkl-dnn
-        git pull
-    else
-       msg "Clonning mkl-dnn sources"
-        git clone --recurse https://github.com/intel/mkl-dnn.git
-    fi
-}
-
-update_pytorch_sources()
-{
-    cd ${HOME}
-    if [[ -d "${HOME}/pytorch" ]]; then
-        msg "Updating PyTorch sources"
-        cd ${HOME}/pytorch
-        git pull
-    else
-        msg "Cloning the PyTorch sources"
-        git clone --recurse https://github.com/pytorch/pytorch
-    fi;
-}
-
-update_torchvision_sources()
-{
-    cd ${HOME}
-    if [[ -d "${HOME}/vision" ]]; then
-        msg "Updaing torchvision sources"
-        cd ${HOME}/vision
-        git pull
-    else
-        msg "Cloning torchvision sources"${HOME}/ompi
-        git clone --recurse https://github.com/pytorch/vision.git
-    fi
-}
-
-update_tochtext_sources(){
-
-    cd ${HOME}
-    if [[ -d "${HOME}/text" ]]; then
-        msg "Updaing torchtext sources"
-        cd ${HOME}/text
-        git pull
-    else
-        msg "Cloning torchtext sources"
-        git clone --recurse https://github.com/pytorch/text.git
-    fi
-}
-
-build_openmpi_sources()
-{
-    msg "Building OpenMPI"
-    sudo apt update  -qq
-    sudo apt install -qqy ccache autoconf automake libtool flex
-    export CC="ccache gcc-7"
-    export CXX="ccache g++-7"
-
-    if [[ -d "/opt/openmpi-4.1.0" ]]; then
-
-        msg "OpenMPI already installed"
-
-    else
-    
-        cd ${HOME}/ompi
-        ./autogen.pl
-        
-        #./configure --prefix=/opt/openmpi-4.1.0 \
-        #            --with-cuda=/usr/local/cuda/ \
-        #            --with-cuda-libdir=/usr/local/cuda/lib64
-
-        ./configure --enable-mpi-thread-multiple \
-                    --prefix=/opt/openmpi-4.1.0 \
-                    --with-cuda=/usr/local/cuda/ \
-                    --with-cuda-libdir=/usr/local/cuda/lib64
-        make -j"$(nproc)" all
-        sudo make -j"$(nproc)" install
-
-        echo 'export PATH=/opt/openmpi-4.1.0/bin:${PATH}' | tee -a ${HOME}/.bashrc
-        echo 'export LD_LIBRARY_PATH=/opt/openmpi-4.1.0/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
-    fi
-
-  export PATH=/opt/openmpi-4.1.0/bin:${PATH}
-  export LD_LIBRARY_PATH=/opt/openmpi-4.1.0/lib:${LD_LIBRARY_PATH}
-  #verify
-  mpirun --version
-  #mpirun (Open MPI) 4.1.0a1
-  ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
-  #mca:mpi:base:param:mpi_built_with_cuda_support:value:true
-
-}
-
 build_pybind11_sources()
 {
     msg "Building PyBind"
@@ -193,6 +148,337 @@ build_pybind11_sources()
     export pybind11_INCLUDE_DIR=/usr/local/include/pybind11
 }
 
+# Lapack
+# http://www.netlib.org/lapack/
+# https://github.com/Reference-LAPACK/lapack.git
+update_lapack_sources()
+{
+    cd ${HOME}
+    if [[ -d "${HOME}/lapack" ]]; then
+        msg "Updating LAPACK sources"
+        cd ${HOME}/lapack
+        git pull
+    else
+       msg "Clonning LAPACK sources"
+       git clone --recurse https://github.com/Reference-LAPACK/lapack.git
+    fi
+}
+build_lapack_sources()
+{
+    msg "Building LAPACK"
+    
+    if [[ -d "/opt/lapack" ]]; then
+
+        msg "LAPACK already installed"
+        msg "For Change version, DO IT MANUALLY"
+
+    else
+        #https://wiki.gentoo.org/wiki/Project:AMD64/Fixing_-fPIC_Errors_Guide
+        #http://theoryno3.blogspot.com/2010/12/compiling-lapack-as-shared-library-in.html
+
+        export CXXFLAGS="$CXXFLAGS -fPIC"
+        export CFLAGS="$CFLAGS -fPIC" 
+
+        cd ${HOME}/lapack
+        
+        cp ${HOME}/lapack/make.inc.example ${HOME}/lapack/make.inc
+        mkdir $HOME/build -p
+        cd $HOME/build
+        cmake .. -DCMAKE_INSTALL_PREFIX=/opt/lapack \
+                 -DBUILD_SHARED_LIBS=ON \
+                 -DLAPACKE=ON \
+                 -DCMAKE_BUILD_TYPE=RELEASE
+        
+        make -j"$(nproc)"
+        sudo make install
+
+        #sudo make install prefix=/opt/lapack
+        #sudo make install prefix=/usr
+
+        echo '# [LAPACK / LAPACKE]' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/lapack:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        echo '/opt/lapack/lib' | sudo tee /etc/ld.so.conf.d/lapack.conf
+        
+        export LD_LIBRARY_PATH=/opt/lapack/lib:${LD_LIBRARY_PATH}
+
+        sudo ldconfig
+    fi
+}
+
+# ATLAS
+# http://math-atlas.sourceforge.net/
+# https://github.com/math-atlas/math-atlas
+update_atlas_sources()
+{
+
+    sudo apt install -qqy txt2man
+    wget https://github.com/math-atlas/math-atlas/archive/v3.11.40.tar.gz -O atlas3.11.40.tar.gz
+    bunzip2 -c atlas3.10.3.tar.bz2 | tar xfm -  
+    mv ATLAS atlas-3.10.3
+
+}
+build_atlas_sources()
+{
+    msg "Building ATLAS"
+    
+    if [[ -d "/opt/atlas" ]]; then
+
+        msg "ATLAS already installed"
+        msg "For Change version, DO IT MANUALLY"
+
+    else
+
+        #cd $HOME/math-atlas
+        #make srcdir=SRC
+        #cd SRC
+        #make
+        #cd ATLAS
+        cd atlas-3.10.3
+        mkdir -p build
+        cd build
+        ../configure -b 64 -D c -DPentiumCPS=3330 --shared --prefix=/opt/atlas  --cripple-atlas-performance 
+        make build
+        #make check
+        #make ptcheck
+        #make time
+        sudo make install
+
+        echo '# [ATLAS]' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/atlas:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        echo '/opt/atlas/lib' | sudo tee /etc/ld.so.conf.d/atlas.conf
+
+        export LD_LIBRARY_PATH=/opt/atlas/lib:${LD_LIBRARY_PATH}
+
+        sudo ldconfig
+    fi
+}
+
+# OpenBlas
+# http://www.openblas.net/
+# https://github.com/xianyi/OpenBLAS
+update_openblas_sources()
+{
+    cd ${HOME}
+    if [[ -d "${HOME}/openblas" ]]; then
+        msg "Updating OpenBlas sources"
+        cd ${HOME}/openblas
+        git pull
+    else
+       msg "Clonning OpenBlas sources"
+       git clone --recurse https://github.com/xianyi/OpenBLAS.git openblas
+    fi
+}
+build_openblas_sources()
+{
+    msg "Building OpenBlas"
+
+    if [[ -d "/opt/openblas" ]]; then
+
+        msg "OpenBlas already installed"
+        msg "For Change version, DO IT MANUALLY"
+
+    else
+    
+        cd ${HOME}/openblas
+
+        make -j"$(nproc)" 
+        #NO_LAPACK=1
+        
+        #sudo make install prefix=/usr
+        sudo make install PREFIX=/opt/openblas
+        
+        echo '# [OpenBLAS]' | tee -a ${HOME}/.bashrc
+        echo 'export PATH=/opt/openblas/bin:${PATH}' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/openblas/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        echo '/opt/openblas/lib' | sudo tee /etc/ld.so.conf.d/openblas.conf
+
+        export PATH=/opt/openblas/bin:${PATH}
+        export LD_LIBRARY_PATH=/opt/openblas/lib:${LD_LIBRARY_PATH}
+
+        sudo ldconfig
+    fi
+}
+
+# MAGMA 2.4.X
+# http://www.icl.utk.edu/research
+# https://icl.utk.edu/magma/software/index.html
+# http://icl.cs.utk.edu/projectsfiles/magma/doxygen/installing.html
+# https://bitbucket.org/icl/magma
+update_magma_sources()
+{
+    cd ${HOME}
+    if [[ -d "${HOME}/magma" ]]; then
+        msg "Updating MAGMA sources"
+        cd ${HOME}/magma
+        hg pull
+        hg update default
+    else
+       msg "Clonning MAGMA sources"
+       hg clone https://bitbucket.org/icl/magma
+    fi
+}
+build_magma_sources()
+{
+    if [[ -d "/opt/openblas" ]]; then
+
+        msg "Magma already installed"
+        msg "For Change version, DO IT MANUALLY"
+
+    else
+
+        export CUDADIR=/usr/loca/cuda
+        #export ACMLDIR=/opt/acml-5.3.1
+        #export ATLASDIR=/opt/atlas
+        #export LAPACKDIR=/opt/LAPACK
+        export OPENBLASDIR=/opt/openblas
+
+        msg "Building MAGMA"
+        #sudo apt update  -qq
+        #sudo apt install liblapack-dev libblas-dev 
+        #sudo apt remove -qqy libblas-common libblas-dev libblas3 liblapack-dev liblapack3
+        #sudo apt remove -qqy libblas-common libblas-dev libblas3 libopenblas-base libopenblas-dev
+        #sudo apt install -qqy libopenblas-dev
+        sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
+        
+        cd ${HOME}/magma
+        cp ${HOME}/magma/make.inc-examples/make.inc.openblas ${HOME}/magma/make.inc
+        
+        #cat << EOF | tee ${HOME}/magma/make.inc
+        #CUDADIR=/usr/local/cuda
+        #MKLROOT=$MKLROOT
+        #FORT=gfortran
+        #FPIC= -fPIC
+        #GPU_TARGET=sm_30
+        ##MIN_ARCH=300
+        ##NV_SM= -gencode arch=compute_30,code=sm_30
+        ##NV_COMP= -gencode arch=compute_30,code=compute_30
+        #EOF
+
+        #-DMAGMA_WITH_MKL
+        #-DMAGMA_NO_V1
+        make -j"$(nproc)" all
+        sudo make install prefix=/opt/magma
+        #sudo make install prefix=/usr
+        sudo ldconfig
+        
+        echo '# [Magma]' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        echo '/opt/magma/lib' | sudo tee /etc/ld.so.conf.d/magma.conf
+
+        export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}
+
+        sudo ldconfig
+    fi
+}
+
+
+export MAGMA_VERSION=magma-2.3.0
+# MAGMA 2.4.0
+download_magma_release()
+{
+    #http://icl.cs.utk.edu/projectsfiles/magma/downloads/magma-2.4.0.tar.gz
+    #http://icl.cs.utk.edu/projectsfiles/magma/downloads/magma-2.3.0.tar.gz
+    
+    filename=${MAGMA_VERSION}.tar.gz
+
+    cd ${HOME}
+    if [[ ! -e "/opt/magma" ]]; then
+        
+        msg "Download MAGMA 2.4.0 sources"
+        
+        if [[ ! -e "/utils/magma/${filename}" ]];then
+            wget http://icl.cs.utk.edu/projectsfiles/magma/downloads/${filename} -O /utils/magma/${filename}
+            cp /utils/magma/${filename} $HOME
+            cd $HOME
+            tar -xf ${filename}
+            #mv ${MAGMA_VERSION} magma
+            ln -s ${MAGMA_VERSION} magma -f
+            #cd $HOME/magma
+
+            # WORK for magma 2.4.0
+            # wget https://raw.githubusercontent.com/pytorch/builder/master/conda/magma-cuda92-2.3.0/cmakelists.patch
+            # wget https://raw.githubusercontent.com/pytorch/builder/master/conda/magma-cuda92-2.3.0/thread_queue.patch
+            # patch <cmakelists.patch
+            # patch -p0 <thread_queue.patch
+
+            # ONLY for magma 2.3.0
+            # wget https://raw.githubusercontent.com/pytorch/builder/master/conda/magma-cuda92-2.3.0/magma_cparict_tools.patch
+            # wget https://raw.githubusercontent.com/pytorch/builder/master/conda/magma-cuda92-2.3.0/magma_dparict_tools.patch
+            # wget https://raw.githubusercontent.com/pytorch/builder/master/conda/magma-cuda92-2.3.0/magma_sparict_tools.patch
+            # wget https://raw.githubusercontent.com/pytorch/builder/master/conda/magma-cuda92-2.3.0/magma_zparict_tools.patch
+            # patch -p0 <magma_cparict_tools.patch
+            # patch -p0 <magma_dparict_tools.patch
+            # patch -p0 <magma_sparict_tools.patch
+            # patch -p0 <magma_zparict_tools.patch
+        else
+            cp /utils/magma/${filename} $HOME
+            cd $HOME
+            tar -xf ${filename}
+            mv ${MAGMA_VERSION} magma
+            #cd $HOME/magma
+
+            # WORK for magma 2.4.0
+            #cp /utils/magma/cmakelists.patch $HOME/magma
+            #cp /utils/magma/thread_queue.patch $HOME/magma
+            #patch -p0 <thread_queue.patch
+            #patch -p0 <magma_cparict_tools.patch
+
+            # ONLY for magma 2.3.0
+            # cp /utils/magma/magma_cparict_tools.patch $HOME/${MAGMA_VERSION}
+            # cp /utils/magma/magma_dparict_tools.patch $HOME/${MAGMA_VERSION}
+            # cp /utils/magma/magma_sparict_tools.patch $HOME/${MAGMA_VERSION}
+            # cp /utils/magma/magma_zparict_tools.patch $HOME/${MAGMA_VERSION}
+            # patch -p0 <magma_cparict_tools.patch
+            # patch -p0 <magma_dparict_tools.patch
+            # patch -p0 <magma_sparict_tools.patch
+            # patch -p0 <magma_zparict_tools.patch
+        fi
+    fi
+}
+build_magma_release()
+{
+    export CUDADIR=/usr/local/cuda
+    
+    export OPENBLASDIR=/opt/openblas
+    #export LAPACKDIR=/opt/lapack
+    #export ATLASDIR=/opt/atlas
+
+    export GPU_TARGET="sm_30"
+    export MAGMA_NO_V1=ON
+    export PREFIX=/opt/${MAGMA_VERSION}
+    
+    #sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
+
+    msg "Building MAGMA 2.4.0"
+
+    # cd $HOME/${MAGMA_VERSION}
+    # mkdir $HOME/${MAGMA_VERSION}/build -p
+    # cd $HOME/${MAGMA_VERSION}/build
+    # cmake .. -DUSE_FORTRAN=ON -DGPU_TARGET="sm_30" -DCMAKE_INSTALL_PREFIX=$PREFIX
+    # make -j"$(nproc)" all
+    # sudo make install
+    
+    cd $HOME/${MAGMA_VERSION}
+    cp make.inc-examples/make.inc.openblas make.inc
+    
+    make -j"$(nproc)" all
+    #sudo make install prefix=/opt/magma
+    sudo make install prefix=$PREFIX OPENBLASDIR=$OPENBLASDIR CUDADIR=$CUDADIR
+
+    export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}
+    echo 'export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+    echo '/opt/magma/lib' | sudo tee /etc/ld.so.conf.d/magma.conf
+    #echo '' | tee -a ${HOME}/.bashrc
+    #echo 'export OMP_NUM_THREADS=10' | tee -a ${HOME}/.bashrc
+    #echo 'export MKL_NUM_THREADS=10' | tee -a ${HOME}/.bashrc
+    #echo 'export VECLIB_MAXIMUM_THREADS=10' | tee -a ${HOME}/.bashrc
+    echo 'export MAGMA_NUM_GPUS=1' | tee -a ${HOME}/.bashrc
+
+    sudo ldconfig
+}
+
+# MKL
+# https://software.intel.com/en-us/mkl
 install_mkl_packages()
 {
     msg "Installing Intel Performance Libraries:"
@@ -278,34 +564,34 @@ install_mkl_packages()
     export CMAKE_LIBRARY_PATH=${MKL_LIBRARY}:${CMAKE_LIBRARY_PATH}
 }
 
-build_magma_sources()
+# http://www.linuxfromscratch.org/hints/downloads/files/intel-fortran-compiler.txt
+# https://software.intel.com/en-us/articles/installing-intel-free-libs-and-python-apt-repo
+install_mkl_repository()
 {
-    msg "Building MAGMA"
-    #sudo apt install liblapack-dev libblas-dev 
-    #sudo apt remove -qqy libblas-common libblas-dev libblas3 liblapack-dev liblapack3
-    #sudo apt remove -qqy libblas-common libblas-dev libblas3 libopenblas-base libopenblas-dev
-    sudo apt update  -qq
-    sudo apt install -qqy libopenblas-dev
-    sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
-    
-    cd ${HOME}/magma
+    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
 
-    cat << EOF | tee ${HOME}/magma/make.inc
-CUDADIR=/usr/local/cuda
-MKLROOT=/opt/intel/mkl
-FORT=gfortran
-FPIC= -fPIC
-GPU_TARGET=sm_30
-#MIN_ARCH=300
-#NV_SM= -gencode arch=compute_30,code=sm_30
-#NV_COMP= -gencode arch=compute_30,code=compute_30
-EOF
-    make -j"$(nproc)" all
-    #sudo make install prefix=/opt/magma
-    sudo make install prefix=/usr
-    sudo ldconfig
+    sudo wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list
+    sudo apt-get update
+    sudo apt install intel-mkl intel-ipp intel-tbb intel-daal intel-mpi
+
 }
 
+# MKL-DNN
+# https://01.org/mkl-dnn
+# https://github.com/intel/mkl-dnn
+update_mkl_dnn_sources()
+{
+    cd ${HOME}
+    if [[ -d "${HOME}/mkl-dnn" ]]; then
+        msg "Updating mkl-dnn sources"
+        cd ${HOME}/mkl-dnn
+        git pull
+    else
+       msg "Clonning mkl-dnn sources"
+        git clone --recurse https://github.com/intel/mkl-dnn.git
+    fi
+}
 build_mkl_dnn_sources()
 {
     msg "Building mkl-dnn"
@@ -332,6 +618,21 @@ build_mkl_dnn_sources()
     sudo ldconfig
 }
 
+# PyTorch
+# https://pytorch.org/
+# https://github.com/pytorch/pytorch
+update_pytorch_sources()
+{
+    cd ${HOME}
+    if [[ -d "${HOME}/pytorch" ]]; then
+        msg "Updating PyTorch sources"
+        cd ${HOME}/pytorch
+        git pull
+    else
+        msg "Cloning the PyTorch sources"
+        git clone --recurse https://github.com/pytorch/pytorch
+    fi;
+}
 build_pytorch_sources()
 {
     msg "Building PyTorch"
@@ -340,30 +641,36 @@ build_pytorch_sources()
         rm -rf ${HOME}/pytorch/dist
     fi
     
-    if [ "${prefix}" = "cpu" ]; then
-        #NO_CUDNN=1 NO_SYSTEM_NCCL=1
-        export USE_CUDA=OFF 
-        export NO_CUDA=1 
-        export NO_CUDNN=1 
-        export NO_SYSTEM_NCCL=1 
-        export WITH_DISTRIBUTED=1 
-        python3 setup.py build_deps
-        python3 setup.py develop
-        python3 setup.py bdist_wheel
-    else
-        #WITH_DISTRIBUTED=1
-        export TORCH_CUDA_ARCH_LIST="${COMPUTE_CAPABILITY}" 
-        export TORCH_NVCC_FLAGS="-Xfatbin -compress-all" 
-        export NO_TEST=1 
-        export USE_MKLDNN=1 
-        export WITH_DISTRIBUTED=1 
-        #export USE_OPENMP=ON 
-        #export MKLDNN_LIBRARY=/usr/local/lib 
-        #export MKLDNN_INCLUDE_DIR=/usr/local/include
-        python3 setup.py build_deps
-        python3 setup.py develop
-        python3 setup.py bdist_wheel
-    fi
+    #if [ "${prefix}" = "cpu" ]; then
+    #    #NO_CUDNN=1 NO_SYSTEM_NCCL=1
+    #    export USE_CUDA=OFF 
+    #    export NO_CUDA=1 
+    #    export NO_CUDNN=1 
+    #    export NO_SYSTEM_NCCL=1 
+    #    export WITH_DISTRIBUTED=1 
+    #    python3 setup.py build_deps
+    #    python3 setup.py develop
+    #    python3 setup.py bdist_wheel
+    #else
+    #WITH_DISTRIBUTED=1
+    export TORCH_CUDA_ARCH_LIST="${COMPUTE_CAPABILITY};" 
+    export TORCH_NVCC_FLAGS="-Xfatbin -compress-all" 
+    #export USE_STATIC_CUDNN=1
+    #export USE_STATIC_NCCL=1
+    #export ATEN_STATIC_CUDA=1
+    #export USE_CUDA_STATIC_LINK=1
+    export NO_TEST=1 
+    export USE_MKLDNN=1 
+    export WITH_DISTRIBUTED=1 
+    export USE_MAGMA=ON
+    export MAGMA_HOME=/opt/magma
+    #export USE_OPENMP=ON 
+    #export MKLDNN_LIBRARY=/usr/local/lib 
+    #export MKLDNN_INCLUDE_DIR=/usr/local/include
+    python3 setup.py build_deps
+    python3 setup.py develop
+    python3 setup.py bdist_wheel
+    #fi
     
     #TODO: save the built package into correct folder
     mkdir -p /var/python-repo-local/3.6/${HOSTNAME_PREFIX}${VERSION}/old/
@@ -382,6 +689,19 @@ build_pytorch_sources()
     #PyTorch.docset
 }
 
+# TorchVision
+update_torchvision_sources()
+{
+    cd ${HOME}
+    if [[ -d "${HOME}/vision" ]]; then
+        msg "Updaing torchvision sources"
+        cd ${HOME}/vision
+        git pull
+    else
+        msg "Cloning torchvision sources"${HOME}/ompi
+        git clone --recurse https://github.com/pytorch/vision.git
+    fi
+}
 build_torchvision_sources()
 {
     msg "Building torchvision"
@@ -403,6 +723,20 @@ build_torchvision_sources()
     #torchvision.docset
 }
 
+# TorchText
+update_tochtext_sources()
+{
+
+    cd ${HOME}
+    if [[ -d "${HOME}/text" ]]; then
+        msg "Updaing torchtext sources"
+        cd ${HOME}/text
+        git pull
+    else
+        msg "Cloning torchtext sources"
+        git clone --recurse https://github.com/pytorch/text.git
+    fi
+}
 build_torchtext_sources()
 {
     msg "Building torchtext"
@@ -431,24 +765,33 @@ build_torchtext_sources()
 build()
 {
     if [[ "${ACTION}" == "req" || "${ACTION}" == "all" ]];then
+        
         requirements;
 
         update_openmpi_sources;
-        update_pybind11_sources;
-        update_magma_sources;
-        update_mkl_dnn_sources;
-        update_pytorch_sources;
-        update_torchvision_sources;
-        update_tochtext_sources
+        #update_lapack_sources;
+        update_openblas_sources;
+        #update_pybind11_sources;
+        download_magma_release;
+        #update_mkl_dnn_sources;
 
         build_openmpi_sources;
-        build_pybind11_sources;
+        #build_lapack_sources;
+        build_openblas_sources;
+        #build_pybind11_sources;
+
         install_mkl_packages;
-        build_magma_sources;
-        build_mkl_dnn_sources;
+
+        #build_magma_sources;
+        build_magma_release;
+        #build_mkl_dnn_sources;
     fi
 
     if [[ "${ACTION}" == "build" || ${ACTION} == "all" ]];then
+        update_pytorch_sources;
+        update_torchvision_sources;
+        update_tochtext_sources;
+
         build_pytorch_sources;
         build_torchvision_sources;
         build_torchtext_sources;
