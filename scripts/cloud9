@@ -31,4 +31,5 @@ cd $HOME/c9sdk
 scripts/install-sdk.sh
 
 msg "Register alias on bash"
+echo '# [Cloud 9]'  | tee -a $HOME/.bashrc
 echo 'alias cloud9="node $HOME/c9sdk/server.js --listen 0.0.0.0 -p 8080 -a : -w ./"'  | tee -a $HOME/.bashrc

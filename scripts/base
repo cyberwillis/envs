@@ -44,8 +44,12 @@ sudo apt install -qqy --no-install-recommends \
                   git mercurial
 
 msg "Upgrading Cmake to v3.11"
-cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
-cmake_folder=cmake-3.11.3-Linux-x86_64
+#[IMPORTANT to BUILD PyTorch !!!]
+#cmake_filename=cmake-3.11.3-Linux-x86_64.tar.gz
+#[IMPORTANT to BUILD MAGMA for PyTorch !!!]
+#https://cmake.org/files/v3.12/cmake-3.12.3-Linux-x86_64.tar.gz
+cmake_filename=cmake-3.12.3-Linux-x86_64.tar.gz 
+cmake_folder=cmake-3.12.3-Linux-x86_64
 cp /utils/cmake/${cmake_filename} ${HOME}/${cmake_filename}
 tar -xf ${HOME}/${cmake_filename} -C ${HOME}
 cd ${HOME}/${cmake_folder}
@@ -62,5 +66,5 @@ sudo sed -i.bak "s=rlimit-nproc\=3=#rlimit-nproc\=3=g" /etc/avahi/avahi-daemon.c
 msg "Fixing Locales"
 sudo locale-gen en_US.UTF-8
 #sudo apt-get install -yq --no-install-recommends language-pack-en
-
+echo "# [Base]" | tee -a ${HOME}/.bashrc
 echo "cd ${HOME}" | tee -a ${HOME}/.bashrc
