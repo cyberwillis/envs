@@ -1,15 +1,11 @@
 #!/bin/bash -e
 
-
 echo "   ___      _____               _      ";
 echo "  / _ \_   /__   \___  _ __ ___| |__   ";
 echo " / /_)/ | | |/ /\/ _ \| '__/ __| '_ \  ";
 echo "/ ___/| |_| / / | (_) | | | (__| | | | ";
 echo "\/     \__, \/   \___/|_|  \___|_| |_| ";
 echo "       |___/                           ";
-
-export COMPUTE_CAPABILITY="7.0"
-export ACTION="req"
 
 source /scripts/.env
 
@@ -98,22 +94,22 @@ build_openmpi_sources()
         
         sudo make -j"$(nproc)" install
         
-        echo '# [OpenBLAS]' | tee -a ${HOME}/.bashrc
-        echo 'export PATH=/opt/openmpi/bin:${PATH}' | tee -a ${HOME}/.bashrc
-        echo 'export LD_LIBRARY_PATH=/opt/openmpi/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
-        echo '/opt/openmpi/lib' | sudo tee /etc/ld.so.conf.d/openmpi.conf
-
         export PATH=/opt/openmpi/bin:${PATH}
         export LD_LIBRARY_PATH=/opt/openmpi/lib:${LD_LIBRARY_PATH}
 
-        sudo ldconfig
-
-        #[Verify]
-        mpirun --version
-        #mpirun (Open MPI) 4.1.0a1
-        ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
-        #mca:mpi:base:param:mpi_built_with_cuda_support:value:true
+        echo '# [OpenBLAS]' | tee -a ${HOME}/.bashrc
+        echo 'export PATH=/opt/openmpi/bin:${PATH}' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/openmpi/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
     fi
+
+    echo '/opt/openmpi/lib' | sudo tee /etc/ld.so.conf.d/openmpi.conf
+    sudo ldconfig
+
+    #[Verify]
+    mpirun --version
+    #mpirun (Open MPI) 4.1.0a1
+    ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
+    #mca:mpi:base:param:mpi_built_with_cuda_support:value:true
 }
 
 # PyBynd11
@@ -287,16 +283,17 @@ build_openblas_sources()
         #sudo make install prefix=/usr
         sudo make install PREFIX=/opt/openblas
         
-        echo '# [OpenBLAS]' | tee -a ${HOME}/.bashrc
-        echo 'export PATH=/opt/openblas/bin:${PATH}' | tee -a ${HOME}/.bashrc
-        echo 'export LD_LIBRARY_PATH=/opt/openblas/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
-        echo '/opt/openblas/lib' | sudo tee /etc/ld.so.conf.d/openblas.conf
-
         export PATH=/opt/openblas/bin:${PATH}
         export LD_LIBRARY_PATH=/opt/openblas/lib:${LD_LIBRARY_PATH}
 
-        sudo ldconfig
+        echo '# [OpenBLAS]' | tee -a ${HOME}/.bashrc
+        echo 'export PATH=/opt/openblas/bin:${PATH}' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/openblas/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        
     fi
+
+    echo '/opt/openblas/lib' | sudo tee /etc/ld.so.conf.d/openblas.conf
+    sudo ldconfig
 }
 
 # MAGMA 2.4.X
@@ -361,18 +358,18 @@ build_magma_sources()
         #sudo make install prefix=/usr
         sudo ldconfig
         
-        echo '# [Magma]' | tee -a ${HOME}/.bashrc
-        echo 'export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
-        echo '/opt/magma/lib' | sudo tee /etc/ld.so.conf.d/magma.conf
-
         export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}
 
-        sudo ldconfig
+        echo '# [Magma]' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
     fi
+
+    echo '/opt/magma/lib' | sudo tee /etc/ld.so.conf.d/magma.conf
+    sudo ldconfig
 }
 
 
-export MAGMA_VERSION=magma-2.3.0
+export MAGMA_VERSION=magma-2.4.0
 # MAGMA 2.4.0
 download_magma_release()
 {
@@ -437,43 +434,50 @@ download_magma_release()
 }
 build_magma_release()
 {
-    export CUDADIR=/usr/local/cuda
-    
-    export OPENBLASDIR=/opt/openblas
-    #export LAPACKDIR=/opt/lapack
-    #export ATLASDIR=/opt/atlas
+    if [[ -d "/opt/magma" ]]; then
 
-    export GPU_TARGET="sm_30"
-    export MAGMA_NO_V1=ON
-    export PREFIX=/opt/${MAGMA_VERSION}
-    
-    #sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
+        msg "Magma already installed"
+        msg "For Change version, DO IT MANUALLY"
+    else
+        export CUDADIR=/usr/local/cuda
+        
+        export OPENBLASDIR=/opt/openblas
+        #export LAPACKDIR=/opt/lapack
+        #export ATLASDIR=/opt/atlas
 
-    msg "Building MAGMA 2.4.0"
+        export GPU_TARGET="sm_30"
+        export MAGMA_NO_V1=ON
+        export PREFIX=/opt/${MAGMA_VERSION}
+        
+        #sudo ln -s /usr/local/cuda/lib64 /usr/local/cuda/lib -f
 
-    # cd $HOME/${MAGMA_VERSION}
-    # mkdir $HOME/${MAGMA_VERSION}/build -p
-    # cd $HOME/${MAGMA_VERSION}/build
-    # cmake .. -DUSE_FORTRAN=ON -DGPU_TARGET="sm_30" -DCMAKE_INSTALL_PREFIX=$PREFIX
-    # make -j"$(nproc)" all
-    # sudo make install
-    
-    cd $HOME/${MAGMA_VERSION}
-    cp make.inc-examples/make.inc.openblas make.inc
-    
-    make -j"$(nproc)" all
-    #sudo make install prefix=/opt/magma
-    sudo make install prefix=$PREFIX OPENBLASDIR=$OPENBLASDIR CUDADIR=$CUDADIR
+        msg "Building MAGMA 2.4.0"
 
-    export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}
-    echo 'export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        # cd $HOME/${MAGMA_VERSION}
+        # mkdir $HOME/${MAGMA_VERSION}/build -p
+        # cd $HOME/${MAGMA_VERSION}/build
+        # cmake .. -DUSE_FORTRAN=ON -DGPU_TARGET="sm_30" -DCMAKE_INSTALL_PREFIX=$PREFIX
+        # make -j"$(nproc)" all
+        # sudo make install
+        
+        cd $HOME/magma
+        cp make.inc-examples/make.inc.openblas make.inc
+        
+        make -j"$(nproc)" all
+        #sudo make install prefix=/opt/magma
+        sudo make install prefix=$PREFIX OPENBLASDIR=$OPENBLASDIR CUDADIR=$CUDADIR
+    
+        export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}
+
+        #echo '' | tee -a ${HOME}/.bashrc
+        #echo 'export OMP_NUM_THREADS=10' | tee -a ${HOME}/.bashrc
+        #echo 'export MKL_NUM_THREADS=10' | tee -a ${HOME}/.bashrc
+        #echo 'export VECLIB_MAXIMUM_THREADS=10' | tee -a ${HOME}/.bashrc
+        echo 'export LD_LIBRARY_PATH=/opt/magma/lib:${LD_LIBRARY_PATH}' | tee -a ${HOME}/.bashrc
+        echo 'export MAGMA_NUM_GPUS=1' | tee -a ${HOME}/.bashrc
+    fi
+
     echo '/opt/magma/lib' | sudo tee /etc/ld.so.conf.d/magma.conf
-    #echo '' | tee -a ${HOME}/.bashrc
-    #echo 'export OMP_NUM_THREADS=10' | tee -a ${HOME}/.bashrc
-    #echo 'export MKL_NUM_THREADS=10' | tee -a ${HOME}/.bashrc
-    #echo 'export VECLIB_MAXIMUM_THREADS=10' | tee -a ${HOME}/.bashrc
-    echo 'export MAGMA_NUM_GPUS=1' | tee -a ${HOME}/.bashrc
-
     sudo ldconfig
 }
 
@@ -621,6 +625,7 @@ build_mkl_dnn_sources()
 # PyTorch
 # https://pytorch.org/
 # https://github.com/pytorch/pytorch
+# https://facebook.ai/developers/tools/pytorch
 update_pytorch_sources()
 {
     cd ${HOME}
