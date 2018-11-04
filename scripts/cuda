@@ -75,7 +75,7 @@ export INSTALL_DRIVER='no'
 #http://www.dreamsyssoft.com/unix-shell-scripting/ifelse-tutorial.php
 if [[ "$#" -gt 0 ]];then
   VERSION="$1"
-
+  
   if [[ "$#" -gt 1 ]];then
     LOCAL_REPOSITORY="$2"
   fi
@@ -289,6 +289,8 @@ install_cuda_packages() {
     sudo ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_30.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc
 
   fi
+
+  echo 'export VERSION=${VERSION}' | tee -a $HOME/.bashrc
 }
 
 install_cuda_10_0() {
@@ -391,7 +393,7 @@ register_libraries_path() {
   export LD_LIBRARY_PATH=${CUPIT_LIB_PATH}:$LD_LIBRARY_PATH
   
   echo '# [Cuda]' | tee -a ${HOME}/.bashrc
-  echo 'export PATH=/usr/local/cuda/bin:${PATH}' | tee -a ${HOME}/.bashrc
+  echo 'export PATH=/usr/local/cuda/bin:${PATH:+:${PATH}}' | tee -a ${HOME}/.bashrc
   echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' | tee -a ${HOME}/.bashrc
   echo 'export LIBRARY_PATH=/usr/local/cuda/lib64/stubs' | tee -a ${HOME}/.bashrc
   echo 'export CUPIT_LIB_PATH=/usr/local/cuda/extras/CUPTI/lib64/' | tee -a ${HOME}/.bashrc
