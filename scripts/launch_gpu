@@ -98,7 +98,7 @@ build_container()
     #export PUBLIC_KEY_STRING=$(cat ${HOME}/.ssh/id_rsa.pub)
     #lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c "mkdir -p /home/ubuntu/.ssh && echo ${PUBLIC_KEY_STRING} | tee /home/ubuntu/.ssh/authorized_keys"
     lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c 'echo "export HOSTNAME_PREFIX=cuda" | tee -a /home/ubuntu/.bashrc';
-    lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c "echo 'export VERSION=${CUDA_VERSION}' | tee -a /home/ubuntu/.bashrc";
+    #lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c "echo 'export VERSION=${CUDA_VERSION}' | tee -a /home/ubuntu/.bashrc";
     lxc exec ${MACHINE_CONTAINER} -- su ubuntu -c 'echo "export DISPLAY=:0" | tee -a ${HOME}/.bashrc';
     lxc exec ${MACHINE_CONTAINER} -- bash -c 'echo export JUPYTER_IP="\$(ip route get 8.8.8.8 | head -1 | cut -d\" \" -f8)" | tee -a /home/ubuntu/.bashrc';
 
@@ -116,8 +116,8 @@ build_container()
   if [[ ${INSTALL_NVIDIA_DRIVER} == 'yes' ]];then
     configure "cuda_extra" "/scripts/cuda_extra"
   fi
-  configure "python3" "/scripts/python3 ${PYTHON_VERSION}"
-  configure "jupyterlab" "/scripts/jupyterlab ${PYTHON_VERSION}"
+  configure "python3" "/scripts/python3 ${PYTHON_VERSION} ${PYTHON_ENVIRONMENT}"
+  configure "jupyterlab" "/scripts/jupyterlab ${PYTHON_VERSION} ${PYTHON_ENVIRONMENT}"
   #configure "jupyterlab_extra" "/scripts/jupyterlab_extra ${PYTHON_VERSION}"
 
   if [[ ${JAVASCRIPT_KERNEL} == 'yes' ]];then
@@ -179,70 +179,75 @@ else
   echo "Cotainers Names already taken:"
   lxc ls --format csv -c n;
   echo ""
-  echo "Type the New Container Name [default=${MACHINE_CONTAINER}]:"
+  echo "Type the New Container Name: [default=${MACHINE_CONTAINER}]:"
   read _NAME_
   if [[ "${_NAME_}" != "" ]];then
     MACHINE_CONTAINER=${_NAME_}
   fi
   
-  echo "Need GPU acceleration (yes/no) [default=${USE_GPU}]:"
+  echo "Need GPU acceleration: (yes/no) [default=${USE_GPU}]:"
   read _GPU_ACCELERATION_
   if [[ "${_GPU_ACCELERATION_}" == 'no' ]];then
     USE_GPU=${_GPU_ACCELERATION_}
   fi
 
-  echo "Install Nvidia Driver ? [dafault=${INSTALL_NVIDIA_DRIVER}]" 
+  echo "Install Nvidia Driver?: [dafault=${INSTALL_NVIDIA_DRIVER}]" 
   echo "(only install if needs OpenGL drivers)"
   read _INSTALL_DRIVER_
   if [[ "${_INSTALL_DRIVER_}" == 'yes' ]];then
     INSTALL_NVIDIA_DRIVER=${_INSTALL_DRIVER_}
   fi
 
-  echo "Which CUDA version (8.0, 9.0, 9.1, 9.2, 10.0) [default=${CUDA_VERSION}]:"
+  echo "Which CUDA version: (8.0, 9.0, 9.1, 9.2, 10.0) [default=${CUDA_VERSION}]:"
   read _VERSION_
   if [[ ${_VERSION_} == "8.0" || ${_VERSION_} == "9.0" || ${_VERSION_} == "9.1" || ${_VERSION_} == "9.2" || ${_VERSION_} == "10.0" ]];then
     CUDA_VERSION=${_VERSION_}
   fi
   
-  echo "Use NVIDIA Local Repository Mirror (yes/no) [default=${LOCAL_REPOSITORY}]"
+  echo "Use NVIDIA Local Repository Mirror: (yes/no) [default=${LOCAL_REPOSITORY}]"
   read _LOCAL_
   if [[ ${_LOCAL_} == 'no' ]]; then
     LOCAL_REPOSITORY=${_LOCAL_}
   fi
 
-  echo "Which Container Image [default=${MACHINE_BASE}]"
+  echo "Which Container Image?: [default=${MACHINE_BASE}]"
   echo "Can be used an image published based in ${MACHINE_BASE}:"
   read _PLATFORM_
   if [[ "${_PLATFORM_}" != "" ]];then
     MACHINE_BASE=${_PLATFORM_}
   fi
 
-  echo "Which Python version [default=${PYTHON_VERSION}]"
-  echo "Pyenv will install it inside the container"
+  echo "Which Python version: [default=${PYTHON_VERSION}]"
   read _PYTHON_VERSION_
   if [[ "${_PYTHON_VERSION_}" != "" ]];then
     PYTHON_VERSION=${_PYTHON_VERSION_}
   fi
 
-  echo "Install Javascript Kernel [default=${JAVASCRIT_KERNEL}]"
+  echo "Which Python environment: (pyenv, miniconda) [default=${PYTHON_ENVIRONMENT}]"
+  read _PYTHON_ENVIRONMENT_
+  if [[ "${_PYTHON_ENVIRONMENT_}" != "" ]];then
+    PYTHON_ENVIRONMENT=${_PYTHON_ENVIRONMENT_}
+  fi
+
+  echo "Install Javascript Kernel: [default=${JAVASCRIT_KERNEL}]"
   read _JAVASCRIPT_KERNEL_
   if [[ "${_JAVASCRIPT_KERNEL_}" != "" ]];then
     JAVASCRIT_KERNEL=${_JAVASCRIPT_KERNEL_}
   fi
 
-  echo "Install R Kernel [default=${R_KERNEL}]"
+  echo "Install R Kernel: [default=${R_KERNEL}]"
   read _R_KERNEL_
   if [[ "${_R_KERNEL_}" != "" ]];then
     R_KERNEL=${_R_KERNEL_}
   fi
 
-  echo "Install Julia Kernel [default=${JULIA_KERNEL}]"
+  echo "Install Julia Kernel: [default=${JULIA_KERNEL}]"
   read _JULIA_KERNEL_
   if [[ "${_JULIA_KERNEL_}" != "" ]];then
     JULIA_KERNEL=${_JULIA_KERNEL_}
   fi
 
-  echo "Install Octave Kernel [default=${OCTAVE_KERNEL}]"
+  echo "Install Octave Kernel: [default=${OCTAVE_KERNEL}]"
   read _OCTAVE_KERNEL_
   if [[ "${_OCTAVE_KERNEL_}" != "" ]];then
     OCTAVE_KERNEL=${_OCTAVE_KERNEL_}

@@ -13,6 +13,8 @@ echo "| | (_| | |_) |  __/>  <| ||  __/ | | \__ \ | (_) | | | \__ \ ";
 echo "|_|\__,_|_.__/ \___/_/\_\\__\___|_| |_|___/_|\___/|_| |_|___/ ";
 echo "                                                              ";
 
+source /scripts/.env
+
 RESET='\033[0m'
 COLOR='\033[1;32m'
 
@@ -20,33 +22,85 @@ msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
 
-cd ${HOME}
-source ${HOME}/.bashrc
 
-if [[ "$#" -gt 0 ]];then
-  PYTHON_VERSION="$1"
+enable_pyenv()
+{
   export PYENV_ROOT=${HOME}/.pyenv
   export PATH=${PYENV_ROOT}/bin:${PATH}
   eval "$(pyenv init -)"
+
   pyenv local ${PYTHON_VERSION}
+
   export PATH=${HOME}/.local/bin:${PATH}
+
+  export PYTHONPATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
+  #export PYTHONPATH=$HOME/.local/lib/python3.6/site-packages
+
+  export PYTHON_BIN_PATH=/home/ubuntu/.pyenv/shims/python
+  #export PYTHON_BIN_PATH=/usr/bin/python3
+
+  export PYTHON_LIB_PATH=/home/ubuntu/.pyenv/versions/${PYTHON_VERSION}/lib/python3.6/site-packages
+  #export PYTHON_LIB_PATH=$HOME/.local/lib/python3.6/site-packages
+
+  #msg "Installing Pre-requisites for docs"
+  #sudo apt-get -qqy install pandoc texlive-xetex
+}
+
+#enable_pyenv()
+#{
+#  cd ${HOME}
+#  source ${HOME}/.bashrc
+#
+#  export PYENV_ROOT=${HOME}/.pyenv
+#  export PATH=${PYENV_ROOT}/bin:${PATH}
+#  eval "$(pyenv init -)"
+#  pyenv local ${PYTHON_VERSION}
+#  export PATH=${HOME}/.local/bin:${PATH}
+#
+#}
+
+enable_miniconda()
+{
+  export PATH="${HOME}/.local/bin:${PATH}"
+  export PATH="${HOME}/anaconda/bin:${PATH}"
+  source activate project
+  #source activate projects
+}
+
+
+install()
+{
+  msg "Enabling labextentions"
+  jupyter labextension install @jupyter-widgets/jupyterlab-manager
+
+  msg "Enabling LaTex in jupyterlab"
+  jupyter labextension install @jupyterlab/latex
+
+  msg "Enabling html render"
+  jupyter labextension install @mflevine/jupyterlab_html
+
+  msg "Drawer for schemes"
+  jupyter labextension install jupyterlab-drawio
+
+  msg "Enabling Plotly in jupyterlab"
+  jupyter labextension install @jupyterlab/plotly-extension
+
+  msg "Enabling Bokeh"
+  jupyter labextension install jupyterlab_bokeh
+}
+
+if [[ "$#" -gt 0 ]];then
+  PYTHON_VERSION="$1"
+
+  if [[ "$#" -gt 1 ]];then
+    PYTHON_ENVIRONMENT="$2"
+  fi
 
 fi
 
-msg "Enabling labextentions"
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
-
-msg "Enabling LaTex in jupyterlab"
-jupyter labextension install @jupyterlab/latex
-
-msg "Enabling html render"
-jupyter labextension install @mflevine/jupyterlab_html
-
-msg "Drawer for schemes"
-jupyter labextension install jupyterlab-drawio
-
-msg "Enabling Plotly in jupyterlab"
-jupyter labextension install @jupyterlab/plotly-extension
-
-msg "Enabling Bokeh"
-jupyter labextension install jupyterlab_bokeh
+if [[ ${PYTHON_ENVIRONMENT} == "pyenv" ]];then
+  enable_pyenv;
+elif [[ ${PYTHON_ENVIRONMENT} == "miniconda" ]];then
+  enable_miniconda;
+fi
+install;
