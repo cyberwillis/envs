@@ -1,1 +1,1 @@
-Here is a collection of scripts to launch and build resources inside the containers
+Scripts to build container images or libraries and frameworks

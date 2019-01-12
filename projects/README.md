@@ -1,1 +1,1 @@
-This folder purpose is to separate projects , it's where jupyterlab or jupyter notebook will be limited to.
+This folder split each project, it's the root of jupyter notebook or the lab.
