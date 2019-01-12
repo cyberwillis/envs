@@ -22,7 +22,7 @@ msg() {
   echo -e "${COLOR}$(date): $1${RESET}"
 }
 
-
+#[DEPRECATED]
 enable_pyenv()
 {
   export PYENV_ROOT=${HOME}/.pyenv
@@ -46,27 +46,13 @@ enable_pyenv()
   #sudo apt-get -qqy install pandoc texlive-xetex
 }
 
-#enable_pyenv()
-#{
-#  cd ${HOME}
-#  source ${HOME}/.bashrc
-#
-#  export PYENV_ROOT=${HOME}/.pyenv
-#  export PATH=${PYENV_ROOT}/bin:${PATH}
-#  eval "$(pyenv init -)"
-#  pyenv local ${PYTHON_VERSION}
-#  export PATH=${HOME}/.local/bin:${PATH}
-#
-#}
-
 enable_miniconda()
 {
   export PATH="${HOME}/.local/bin:${PATH}"
   export PATH="${HOME}/anaconda/bin:${PATH}"
-  source activate project
+  source activate projects
   #source activate projects
 }
-
 
 install()
 {
@@ -87,6 +73,9 @@ install()
 
   msg "Enabling Bokeh"
   jupyter labextension install jupyterlab_bokeh
+
+  msg "Enabling Jupyterlab-Github"
+  jupyter labextension install @jupyterlab/github
 }
 
 if [[ "$#" -gt 0 ]];then

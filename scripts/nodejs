@@ -19,29 +19,23 @@ msg() {
 install_binary(){
 
   msg "Installing NodeJs Binary (8.xx)"
-  #only works for python3.5/python2.7 pre-installed
-  # [DEPRECATED until resolution of the community]
-  # This way creates a problem that the packages folder will need previleges (sudo)
-  #curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-  #sudo apt update
-  #sudo apt install -y --no-install-recommends nodejs
-  #sudo npm i -g npm
-  #sudo chown -R ${USER}:$(id -gn ${USER}) ${HOME}/.config
-
+  
   wget -qO- https://deb.nodesource.com/setup_8.x | sudo -E bash -
   sudo apt update  -qqy
   sudo apt install -qqy --no-install-recommends nodejs
   sudo npm i -g npm
   sudo chown -R ${USER}:$(id -gn ${USER}) ${HOME}/.config
-
+  sudo mkdir -p /usr/lib/node_modules
+  sudo chown ${USER}:$(id -gn ${USER}) /usr/lib/node_modules
 }
 
 install_from_source(){
 
-  msg "Building NodeJs Sources (8.xx)"
+  msg "Building NodeJs Sources (10.15.0)"
   sudo apt update -qqy
   sudo apt install python-minimal -qqy
-  node_version=v8.12.0
+  node_version=v10.15.0
+  #node_version=v8.12.0
   nodejs_filename=node-${node_version}.tar.gz
 
   cd ${HOME}
@@ -52,7 +46,7 @@ install_from_source(){
     rm ${HOME}/${nodejs_filename}
   fi
 
-  cd ${HOME}/node-v8.11.3
+  cd ${HOME}/node-${node_version}
   ./configure --prefix=${HOME}/.local
   make -j"$(nproc)"
   make install

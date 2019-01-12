@@ -27,6 +27,7 @@ if [[ "$#" -gt 0 ]];then
   
 fi
 
+#[DEPRECATED]
 enable_pyenv()
 {
   export PYENV_ROOT=${HOME}/.pyenv
@@ -54,7 +55,7 @@ enable_miniconda()
 {
   export PATH="${HOME}/.local/bin:${PATH}"
   export PATH="${HOME}/anaconda/bin:${PATH}"
-  source activate project
+  source activate projects
   #source activate projects
 }
 
@@ -65,12 +66,14 @@ elif [[ ${PYTHON_ENVIRONMENT} == "miniconda" ]];then
     enable_miniconda;
 fi
 
+PYTHON3_MAJOR_MINOR=$(python3 -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')
+
 msg "Installing Jupyterlab"
 
 #mkdir -p /var/python-repo-local/3.6
 cd ${HOME}
-pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/3.6 
-pip install --user -U -r /projects/requirements.generic -f /var/python-repo-local/3.6 --process-dependency-links
+pip download --exists-action 'w' -r /projects/requirements.generic -d /var/python-repo-local/${PYTHON3_MAJOR_MINOR}
+pip install -U -r /projects/requirements.generic -f /var/python-repo-local/${PYTHON3_MAJOR_MINOR} --process-dependency-links #--user
 
 msg "Enabling ipyparallel extension"
 ipcluster start --n=8 --ip=* --daemonize && ipcluster stop
@@ -108,7 +111,6 @@ jupyter nbextension enable toggle_all_line_numbers/main
 jupyter nbextension enable init_cell/main
 #jupyter nbextension enable nbextensions_configurator/tree_tab/main
 #jupyter nbextension enable nbextensions_configurator/config_menu/main
-
 
 # https://ipython.org/ipython-doc/3/notebook/public_server.html
 echo "# [Jupyter Notebook / JupyterLab]" | tee -a ${HOME}/.bashrc
@@ -157,5 +159,5 @@ sudo systemctl enable jupyter.service
 sudo systemctl daemon-reload
 sudo systemctl restart jupyter.service
 
-pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/3.6
-pip install --user -U -r /projects/requirements.fastai -f /var/python-repo-local/3.6 --process-dependency-links
+# pip download --exists-action 'w' -r /projects/requirements.fastai -d /var/python-repo-local/${PYTHON3_MAJOR_MINOR}
+# pip install --user -U -r /projects/requirements.fastai -f /var/python-repo-local/${PYTHON3_MAJOR_MINOR} --process-dependency-links
